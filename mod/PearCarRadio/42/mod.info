@@ -1,8 +1,8 @@
 name=Muldraugh Afterdark FM [B42.21]
 id=PearCarRadio
 author=DonVladi
-description=Works with Project Zomboid Build 42.21 (singleplayer). Play Pear Desktop through your car radio on 94.6 MHz. Requires Pear Desktop and the Windows Connector app; download instructions are on the Workshop page.
-version=0.5.1
+description=Works with Project Zomboid Build 42.21 (singleplayer). Play Pear Desktop through your car radio on 94.6 MHz. Includes experimental multiplayer car radio streaming and shared controls on Build 42.21. Requires Afterdark FM Connector on each listening PC and Pear Desktop on music suppliers. See the Workshop page for beta limits.
+version=0.8.0-beta.1
 poster=poster.png
 versionMin=42.21
 

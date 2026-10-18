@@ -1,15 +1,18 @@
 AFTERDARK FM CONNECTOR - FOR MULDRAUGH AFTERDARK FM
-94.6 MHz / Singleplayer
+Version 0.8.0-beta.1 / 94.6 MHz
 Works with Project Zomboid Build 42.21 (singleplayer).
+Experimental multiplayer car audio and shared controls were tested with two players.
+Latest volume/tuning fixes, placed radios and dedicated servers need more testing.
 
 You do NOT need Python, PowerShell or a command prompt to play.
 
-Required: the Workshop mod, Pear Desktop, and this Windows Connector app.
+Required: the Workshop mod and this Windows Connector app on every listening PC.
+Only music suppliers need Pear Desktop. Multiplayer listeners do not need Pear.
 Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3821956623
 Pear Desktop: https://github.com/pear-devs/pear-desktop
 
 1. Subscribe to the mod in Steam Workshop and enable it in Project Zomboid.
-   Do not keep duplicate local/Workshop copies.
+   Mod ID: PearCarRadio. Disable AfterdarkGameLab and duplicate local copies.
 2. Open Pear Desktop and choose a song or playlist.
 3. In Pear Desktop, open Plugins and enable the included API Server plugin.
    In that plugin's settings, use 127.0.0.1 and port 26538,
@@ -24,6 +27,20 @@ Pear Desktop: https://github.com/pear-devs/pear-desktop
 
 Music continues when you leave the car and fades as you walk away.
 Switching stations stops controlled playback. The radio can attract zombies.
+
+MULTIPLAYER BETA
+Host: append Workshop item 3821956623 and mod PearCarRadio to server settings.
+Every listener: press Start in the main window's Multiplayer radios (Steam) panel.
+Supplier: before Start, check Allow Use my Pear, select its process and authorize
+the Pear API Server plugin as described above. Both players use the same panel.
+In a powered car radio, tune to 94.6 MHz and press Use my Pear. Occupants can
+change songs, pause/resume and take ownership with their own authorized Pear.
+
+The in-game radio volume is shared. Personal listening volume adjusts only
+received audio locally. The supplier hears Pear directly; their own distance
+fade is pending. Remote listeners hear distance attenuation. No separate VPN or
+audio port is configured in Connector. Only one mode can run at a time.
+
 Close the connector or click Disconnect when finished; it pauses the music
 it was controlling. Force-closing the process may prevent that final pause.
 
@@ -35,5 +52,7 @@ If stopped during authorization, close the prompt in Pear to finish disconnectin
 Support and instructions:
 https://github.com/Vlastrix/muldraugh-afterdark-fm
 
-Current limits: Windows Connector, singleplayer, one tracked car.
-Song/playlist links inside the game and multiplayer are not supported yet.
+Windows suppliers need process capture (build 20348+, Windows 11 recommended).
+Placed radios, dedicated servers and larger groups are unverified. Handheld
+radios, in-game URLs and audio mixing are excluded. Restart after updates and
+retune old saved radios to 94.6 MHz. Use matching mod and Connector versions.

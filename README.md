@@ -1,14 +1,14 @@
 # Muldraugh Afterdark FM [B42.21]
 
-**Works with Project Zomboid Build 42.21 (singleplayer).** Mod version **0.5.1**, experimental. Playback was tested by the author in v0.5.0 with Pear 3.12.0; v0.5.1 renames the app to Afterdark FM Connector. Other game builds and multiplayer have not been verified.
+**Works with Project Zomboid Build 42.21 (singleplayer).** Version **0.8.0-beta.1** also includes experimental multiplayer car radios. Two-player Pear audio and shared controls were user-tested on Build 42.21. Latest shared-volume/tuning fixes, placed radios, dedicated servers and larger groups still need live validation. Other builds are not supported.
 
-Play the **song or playlist already open in Pear Desktop** through **94.6 MHz Afterdark FM** on your car radio. Audio plays in Pear; the mod does not download or retransmit music.
+Play the **song or playlist already open in Pear Desktop** through **94.6 MHz Afterdark FM**. Multiplayer streams the supplier's actual Pear audio through Zomboid's existing connection. Only suppliers need Pear; listeners need the mod and Connector. The mod does not download music.
 
 ## Player setup
 
 **Afterdark FM Connector** is the Windows app that connects the mod to Pear. **Players do not need to install Python or use a command prompt.** Pear Desktop and Connector must stay open while playing.
 
-You need three parts: the **[Workshop mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3821956623)**, **[Pear Desktop](https://github.com/pear-devs/pear-desktop)**, and our **[Windows Connector ZIP](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases/download/v0.5.1/AfterdarkFMConnector-Windows-0.5.1.zip)**. See the [v0.5.1 test release](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases/tag/v0.5.1) for release notes and checksums. Extract the entire Windows ZIP; GitHub's source-code archives are for developers.
+Download the **[Workshop mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3821956623)** and matching **[Windows Connector ZIP](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases/download/v0.8.0-beta.1/AfterdarkFMConnector-Windows-0.8.0-beta.1.zip)**. Music suppliers also need **[Pear Desktop](https://github.com/pear-devs/pear-desktop)**. See the [beta release](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases/tag/v0.8.0-beta.1) for notes and checksums. Extract the entire ZIP; source-code archives are for developers.
 
 1. Open Pear Desktop / YouTube Music, select a song or playlist and verify playback.
 2. In Pear Desktop, open **Plugins** and enable the included **API Server** plugin. In that plugin's settings, use hostname `127.0.0.1`, port `26538`, and **Auth at first** authentication. No router port forwarding is required. API documentation is available at <http://127.0.0.1:26538/swagger> while enabled.
@@ -16,7 +16,7 @@ You need three parts: the **[Workshop mod](https://steamcommunity.com/sharedfile
    ![Pear Desktop Plugins menu with API Server [Beta] enabled and its Hostname, Port and Authorization strategy settings](assets/pear-api-server.png)
 
 3. Subscribe to the game mod in Workshop. Enable only one copy of the mod; remove local development copies before testing a Workshop download.
-4. Extract the Windows Connector ZIP and double-click **AfterdarkFMConnector.exe**. In the development build, press **Connect** under **Singleplayer**. Authorize **PZPearCarRadio** in Pear when prompted and keep the app open.
+4. Extract the Windows Connector ZIP and double-click **AfterdarkFMConnector.exe**. It starts disconnected. Press **Connect** under **Singleplayer**. Authorize **PZPearCarRadio** in Pear when prompted and keep the app open.
 5. Start Zomboid and enable **Muldraugh Afterdark FM**. For an existing save, use **Load → More → Choose mods**. A test save is recommended.
 6. Enter a car with an installed radio and a charged battery. Open its radio from the vehicle menu (`V`) and switch it on. Select **94.6 MHz Afterdark FM** under **Channel**, then press **Tune in**. The panel also has a **Tune to Afterdark FM** shortcut.
 7. Use the normal radio volume control and **Previous / Pause / Next**. Unpause the game to play music.
@@ -25,7 +25,18 @@ Click **Disconnect** or close the app when finished. Forcefully terminating its 
 
 The Workshop package contains the game mod; the connector is a separate Windows download because the game's Workshop validator rejects executables. See the [quick start](docs/QUICK_START.txt) and [publishing guide](docs/PUBLISHING.md).
 
-## Radio behavior
+## Multiplayer beta
+
+1. Update the mod on server and clients. Server settings must include `WorkshopItems=3821956623` and `Mods=PearCarRadio` alongside other mods. Disable **AfterdarkGameLab** and duplicate development copies.
+2. Every listening player uses **Start** in the main window's **Multiplayer radios (Steam)** panel. No separate Connector VPN or audio port is configured.
+3. A supplier first checks **Allow Use my Pear**, selects their Pear process and authorizes the API Server plugin. Listeners leave this checkbox off and do not need Pear or an account.
+4. In a powered car radio, tune to **94.6 MHz** and press **Use my Pear**. Occupants share playback buttons and can take over with their own authorized Pear.
+
+The in-game radio volume is shared. **Personal listening volume** changes only received audio on that computer. The supplier hears Pear directly: the supplier's own distance attenuation is pending. Remote listeners hear distance attenuation. Placed radios, dedicated servers and larger groups remain unverified. Only one Connector mode can run at a time.
+
+After updating, restart the game, server and Connector and retune old saved radios to 94.6 MHz. Follow [Quick start](docs/QUICK_START.txt) and [Multiplayer validation](docs/RADIO_TEST.md).
+
+## Singleplayer radio behavior
 
 The frequency is saved with the radio. Switching stations pauses Pear and restores normal radio audio. **Return to previous station** switches back directly.
 
@@ -51,7 +62,8 @@ Original radio voices and static audio are muted on Afterdark FM. This is config
 
 ## Limitations
 
-- Singleplayer, local player 0 only. Multiplayer and split-screen are not supported yet.
+- Singleplayer uses local player 0. Multiplayer is a two-player-tested beta with the limits above; split-screen is not supported.
+- Suppliers need Windows process capture support (build 20348 or later; Windows 11 recommended). Multiplayer listeners do not need process capture. Handheld radios and mixing multiple sources are excluded.
 - Select music **in Pear**. Loading links from the game is pending; upstream playlist API work is tracked in [Pear #4615](https://github.com/pear-devs/pear-desktop/pull/4615).
 - The connector currently supports Windows. Workshop alone will not launch it.
 - Playback, content availability and account access depend on Pear. The mod never receives your Google password.
@@ -78,9 +90,9 @@ For a custom user directory or API port, use the connector's **Settings** before
 
 ## Development
 
-See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) and [multiplayer radio test](docs/RADIO_TEST.md) for the experimental branch. The user confirmed two-player tone and Pear audio over the game's existing connection in 0.6.2-dev. Version 0.7.7-dev adds car and placed-radio sessions; those game interactions still need live validation. The diagnostic [audio lab](docs/AUDIO_LAB.md) and [game network lab](docs/GAME_LAB.md) remain available. The public v0.5.1 release supports singleplayer only.
+See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) and [multiplayer validation checklist](docs/RADIO_TEST.md). Two-player audio and shared controls have user validation; latest fixes, placed radios and dedicated servers need further testing. Developer-only transport tools remain available with `--audio-lab` and `--game-lab`.
 
-The experimental audio build requires Python 3.12 with `requirements-build.txt`; the singleplayer CLI still uses Python 3.9 or later. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the published singleplayer app when available. The experimental app builds separately under `dist/0.7.7-dev`.
+The streaming build requires Python 3.12 with `requirements-build.txt`; players use the bundled EXE. The singleplayer developer CLI remains available with `python bridge/pear_bridge.py`. Release output is under `dist/0.8.0-beta.1`. Keep local development copies disabled when testing Workshop downloads.
 
 Build the Windows download and separate Workshop package with `powershell -ExecutionPolicy Bypass -File .\Build-Release.ps1`. This creates an isolated build environment and bundles Python and Tcl/Tk into the EXE using PyInstaller. A GitHub Actions workflow also builds on manual dispatch or version tags. See [publishing](docs/PUBLISHING.md) for the upload checklist. Built artifacts and local credentials are excluded from Git.
 

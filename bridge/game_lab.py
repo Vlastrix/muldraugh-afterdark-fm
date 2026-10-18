@@ -80,7 +80,7 @@ class GameLabWindow:
         self.volume.pack(fill='x', pady=6)
         ttk.Label(body, textvariable=self.status, wraplength=wrap).pack(anchor='w', pady=(10, 6))
         ttk.Label(body, textvariable=self.metrics, wraplength=wrap).pack(anchor='w')
-        ttk.Label(body, text='Use the test mod on both clients AND the server.\nTune a powered radio to Afterdark FM, then press Use my Pear.\nRadio volume is shared. The owner hears Pear directly; distance fade applies to remote listeners.', wraplength=wrap).pack(anchor='w', pady=14)
+        ttk.Label(body, text='Enable Muldraugh Afterdark FM on both clients AND the server.\nTune a powered radio to Afterdark FM, then press Use my Pear.\nRadio volume is shared. The owner hears Pear directly; distance fade applies to remote listeners.', wraplength=wrap).pack(anchor='w', pady=14)
         if not self.embedded:
             root.protocol('WM_DELETE_WINDOW', self.close)
         root.after(100, self.poll)

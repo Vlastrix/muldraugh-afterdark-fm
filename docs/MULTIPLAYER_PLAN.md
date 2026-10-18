@@ -1,6 +1,6 @@
 # Multiplayer plan
 
-Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.7-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
+Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.8.0-beta.1** and awaits live radio testing. The beta release targets Build 42.21 with singleplayer behavior and experimental two-player car audio/shared controls. Latest fixes, placed radios and dedicated servers still need live validation.
 
 ## Current progress
 
@@ -8,7 +8,7 @@ On October 18, 2026, the user confirmed the 0.6.2-dev game-network test tone and
 
 Version 0.7.0-dev connects that transport to car radios and placed world radios. The server owns sessions, validates ownership/control requests, relays ordered Pear actions, chooses each player's nearby source and calculates listener gain. Use my Pear replaces ownership; source power/station changes, removal and Connector timeout release sessions. Automated checks cover authority, takeover, command ordering, real Opus through the Lua/file relay and radio UI wiring. Follow [Multiplayer radio test](RADIO_TEST.md) for live validation.
 
-The user confirmed radio music and shared buttons between two players in 0.7.0-dev. Version 0.7.1-dev applies shared radio volume at Pear before capture and refreshes the native channel selector after timed tuning. These fixes need live verification. The owner still monitors Pear directly, so owner-side distance attenuation remains unresolved; remote listeners apply distance attenuation locally. Held inventory radios and multiple-source mixing remain future work. The standalone [audio lab](AUDIO_LAB.md) and [game network lab](GAME_LAB.md) remain diagnostic tools. The public Workshop release is unchanged.
+The user confirmed radio music and shared buttons between two players in 0.7.0-dev. Version 0.7.1-dev applies shared radio volume at Pear before capture and refreshes the native channel selector after timed tuning. These fixes need live verification. The owner still monitors Pear directly, so owner-side distance attenuation remains unresolved; remote listeners apply distance attenuation locally. Held inventory radios and multiple-source mixing remain future work. The standalone [audio lab](AUDIO_LAB.md) and [game network lab](GAME_LAB.md) remain diagnostic tools. The 0.8.0-beta.1 Workshop update includes experimental car radio streaming with these limits.
 
 ## Goal
 

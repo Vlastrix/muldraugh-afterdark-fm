@@ -1,6 +1,6 @@
 param([string]$ZomboidDir = (Join-Path $env:USERPROFILE 'Zomboid'))
 $ErrorActionPreference = 'Stop'
-$source = Join-Path $PSScriptRoot 'dist\0.7.7-dev\Test-Mod\AfterdarkGameLab'
+$source = Join-Path $PSScriptRoot 'dist\0.8.0-beta.1\Test-Mod\AfterdarkGameLab'
 if (-not (Test-Path -LiteralPath (Join-Path $source '42\mod.info'))) {
     throw 'Build the experimental package first with Build-Release.ps1.'
 }

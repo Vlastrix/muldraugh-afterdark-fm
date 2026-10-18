@@ -14,7 +14,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.7.7-dev"
+VERSION = "0.8.0-beta.1"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
