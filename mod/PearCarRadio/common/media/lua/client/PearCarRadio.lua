@@ -24,11 +24,11 @@ Radio.sourceVehicle = nil
 
 -- Keep the existing mod ID, option keys and bridge files compatible with saves.
 local options = PZAPI.ModOptions:create("PearCarRadio", Radio.stationName)
-options:addDescription("Abre una cancion o playlist en Pear y ejecuta el puente local. Solo singleplayer.")
-local noiseOption = options:addTickBox("zombieNoise", "La musica atrae zombis", true,
-    "Agrega ruido en el coche mientras Pear confirma reproduccion. El volumen de la radio controla el alcance.")
-local muteOption = options:addTickBox("muteVanilla", "Silenciar audio de la radio original al usar Pear", true,
-    "Silencia voces y estatica de esta radio. Conserva el volumen, los canales y los demas sonidos del coche.")
+options:addDescription("Open a song or playlist in Pear and run the local bridge. Singleplayer only.")
+local noiseOption = options:addTickBox("zombieNoise", "Music attracts zombies", true,
+    "Generate noise at the car while Pear confirms playback. The radio volume controls its range.")
+local muteOption = options:addTickBox("muteVanilla", "Mute the original radio audio while using Pear", true,
+    "Mute this radio's voices and static. Keep its volume, channels and other vehicle sounds.")
 
 local function encode(value)
     return (tostring(value or ""):gsub("[^%w%-%._~]", function(char)
@@ -192,8 +192,8 @@ function Radio.writeState(active, playing, volume, vehicleId)
     -- B42.21 allows writes only to ini/cfg/txt/log/json extensions.
     local file = getFileWriter("PearCarRadio.control.txt", true, false)
     if not file then
-        if not Radio.fileError then print("[PearCarRadio] No se pudo escribir PearCarRadio.control.txt") end
-        Radio.fileError = "No se puede escribir la senal del mod. Revisa console.txt."
+        if not Radio.fileError then print("[PearCarRadio] Could not write PearCarRadio.control.txt") end
+        Radio.fileError = "Cannot write the mod signal. Check console.txt."
         return
     end
     Radio.fileError = nil
@@ -231,7 +231,7 @@ function Radio.refreshStationSignal(device)
     local ok = pcall(function() device:doReceiveSignal(0) end)
     if not ok then
         Radio.signalUnsupported = true
-        print("[PearCarRadio] Senal local no disponible; Pear sigue funcionando sin ocultar estatica.")
+        print("[PearCarRadio] Local signal unavailable; Pear remains usable without hiding static.")
     end
 end
 
@@ -285,16 +285,16 @@ function RWMPearCarRadio:createChildren()
     local height = self.lineHeight + 8
     self:setHeight(height * 2 + self.lineHeight * 4 + 26)
     self.useButton = ISButton:new(10, 8, self.width - 20, height,
-        "Sintonizar Afterdark FM", self, RWMPearCarRadio.onUse)
+        "Tune to Afterdark FM", self, RWMPearCarRadio.onUse)
     self.useButton:initialise()
     self:addChild(self.useButton)
     local width = (self.width - 28) / 3
     self.previousButton = ISButton:new(10, height + 14, width, height,
-        "Anterior", self, RWMPearCarRadio.onPrevious)
+        "Previous", self, RWMPearCarRadio.onPrevious)
     self.pauseButton = ISButton:new(14 + width, height + 14, width, height,
-        "Pausa", self, RWMPearCarRadio.onPause)
+        "Pause", self, RWMPearCarRadio.onPause)
     self.nextButton = ISButton:new(18 + width * 2, height + 14, width, height,
-        "Siguiente", self, RWMPearCarRadio.onNext)
+        "Next", self, RWMPearCarRadio.onNext)
     for _, button in ipairs({self.previousButton, self.pauseButton, self.nextButton}) do
         button:initialise()
         self:addChild(button)
@@ -345,8 +345,8 @@ function RWMPearCarRadio:prerender()
     -- UI keeps rendering while paused; OnTick alone does not cover that case.
     Radio.tick()
     local selected = self:isSelected()
-    self.useButton:setTitle(selected and "Volver a la emisora anterior" or "Sintonizar Afterdark FM")
-    self.pauseButton:setTitle(Radio.paused and "Seguir" or "Pausa")
+    self.useButton:setTitle(selected and "Return to previous station" or "Tune to Afterdark FM")
+    self.pauseButton:setTitle(Radio.paused and "Resume" or "Pause")
     local powered = selected and self.deviceData and self.deviceData:getIsTurnedOn()
     self.pauseButton:setEnable(powered == true)
     self.nextButton:setEnable(powered == true and not Radio.paused and getGameSpeed() > 0)
@@ -354,14 +354,14 @@ function RWMPearCarRadio:prerender()
 
     local status = Radio.status
     local hint = Radio.frequency and string.format("Afterdark FM - %.2f MHz", Radio.frequency / 1000)
-        or "No hay frecuencia FM libre para Pear."
-    if isClient() then hint = "MVP disponible solo en singleplayer."
-    elseif selected and not powered then hint = "Enciende la radio del coche."
-    elseif selected and getGameSpeed() == 0 then hint = "Despausa la partida para reproducir."
-    elseif selected and Radio.paused then hint = "Pausa desde el coche."
+        or "No free FM frequency for Pear."
+    if isClient() then hint = "This MVP supports singleplayer only."
+    elseif selected and not powered then hint = "Turn on the car radio."
+    elseif selected and getGameSpeed() == 0 then hint = "Unpause the game to play music."
+    elseif selected and Radio.paused then hint = "Paused from the car."
     end
-    local lines = {hint, Radio.fileError or status.message or "Puente sin conexion. Ejecuta Iniciar-Puente.cmd.",
-        status.title or "Sin cancion", status.artist or ""}
+    local lines = {hint, Radio.fileError or status.message or "Bridge offline. Run Start-Bridge.cmd.",
+        status.title or "No song", status.artist or ""}
     self:setStencilRect(8, self.textY, self.width - 16, self.lineHeight * 4)
     for i, line in ipairs(lines) do
         self:drawText(line, 10, self.textY + (i - 1) * self.lineHeight, 0.85, 0.95, 0.85, 1, UIFont.Small)

@@ -412,7 +412,7 @@ class LuaTests(unittest.TestCase):
         ''')
         self.assertEqual(self.control()["playing"], "1")
         self.assertEqual(self.evaluate("failures"), 1)
-        self.assertEqual(self.evaluate("panel.useButton.title"), "Volver a la emisora anterior")
+        self.assertEqual(self.evaluate("panel.useButton.title"), "Return to previous station")
         self.assertTrue(self.evaluate("panel.pauseButton.enable"))
 
     def test_signal_not_generated_for_radio_without_power(self):
@@ -492,10 +492,10 @@ class LuaTests(unittest.TestCase):
     def test_status_decodes_percent_and_unicode(self):
         self.execute(r'''
             files["PearCarRadio.status.txt"]="timestamp=" .. tostring(now/1000)
-                .. "\ntitle=Caf%C3%A9%20%26%20pop\n"
+                .. "\ntitle=Music%20%E2%99%AB%20%26%20pop\n"
             PearCarRadio.readStatus()
         ''')
-        self.assertEqual(self.evaluate("PearCarRadio.status.title"), "Café & pop")
+        self.assertEqual(self.evaluate("PearCarRadio.status.title"), "Music ♫ & pop")
 
 
 if __name__ == "__main__":

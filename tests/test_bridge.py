@@ -25,7 +25,7 @@ def snapshot(**changes):
 class FakePear:
     def __init__(self):
         self.calls = []
-        self.song = dict(videoId="abcdef12345", title="Cancion", artist="Artista", isPaused=False)
+        self.song = dict(videoId="abcdef12345", title="Song", artist="Artist", isPaused=False)
         self.fail_pause = False
 
     def get(self, endpoint):
@@ -93,9 +93,9 @@ class ProtocolTests(unittest.TestCase):
         self.assertIsNone(reader.read(written + bridge.STALE_SECONDS + 0.01))
 
     def test_status_roundtrip_unicode_and_newlines(self):
-        bridge.write_status(self.path, {"title": "Regueton: corazon 🎵\nsegunda linea", "playing": "1"})
+        bridge.write_status(self.path, {"title": "Night radio 🎵\nsecond line", "playing": "1"})
         values = dict(line.split("=", 1) for line in self.path.read_text(encoding="utf-8").splitlines())
-        self.assertEqual(unquote(values["title"]), "Regueton: corazon 🎵\nsegunda linea")
+        self.assertEqual(unquote(values["title"]), "Night radio 🎵\nsecond line")
         self.assertFalse(self.path.with_suffix(".tmp").exists())
 
 

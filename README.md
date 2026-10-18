@@ -1,65 +1,80 @@
-# Muldraugh Afterdark FM — MVP singleplayer
+# Muldraugh Afterdark FM
 
-Controla la canción **o la playlist que ya tengas abierta en Pear Desktop** desde la emisora **Afterdark FM** de la radio de un coche en Project Zomboid Build 42.20+. El audio se reproduce en Pear; no se descarga ni se retransmite música. Versión 0.4.0, experimental.
+Play the **song or playlist already open in Pear Desktop** through **94.46 MHz Afterdark FM** on your Project Zomboid car radio. Audio plays in Pear; the mod does not download or retransmit music. Version **0.4.1**, experimental, singleplayer only. Requires Build 42.20 or later; developed against Build 42.21 and Pear 3.12.0.
 
-## Preparar y jugar
+## Setup
 
-1. Abre Pear Desktop / YouTube Music. La instalación detectada en este equipo es 3.12.0. Selecciona una canción o playlist y comprueba que se escucha.
-2. En el menú de plugins de Pear, activa **API Server**. Configura el hostname como `127.0.0.1`, puerto `26538` y conserva la autenticación **Auth at first**. No necesitas abrir puertos del router. Su documentación aparece en <http://127.0.0.1:26538/swagger> cuando está activo.
-3. Con Zomboid cerrado, ejecuta en PowerShell: `powershell -ExecutionPolicy Bypass -File .\Instalar-Mod.ps1`. Solo copia este mod a tu carpeta local; no toca los archivos del juego ni activa mods en partidas.
-4. Ejecuta **Iniciar-Puente.cmd**. Requiere Python 3.9 o posterior; no necesita instalar paquetes. Acepta en Pear la solicitud de **PZPearCarRadio**. No compartas el token de Pear ni tus credenciales.
-5. Abre Zomboid y activa **Muldraugh Afterdark FM**. En una partida existente usa **Cargar → Más → Elegir mods**; es recomendable una partida de prueba.
-6. Sube a un coche con radio instalada y batería. Abre su radio desde el menú del vehículo (`V`) y enciéndela. En **Channel**, selecciona **94.46 MHz Afterdark FM** y pulsa **Tune in**. También puedes usar el botón **Sintonizar Afterdark FM** del panel Muldraugh Afterdark FM.
-7. Usa el volumen normal de la radio y los botones **Anterior / Pausa / Siguiente** del panel Pear.
+1. Open Pear Desktop / YouTube Music, select a song or playlist and verify playback.
+2. Enable Pear's **API Server** plugin. Use hostname `127.0.0.1`, port `26538`, and **Auth at first** authentication. No router port forwarding is required. API documentation is available at <http://127.0.0.1:26538/swagger> while enabled.
+3. Close Zomboid and run `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. This copies the mod into your local mods directory; it does not edit game files or enable mods in a save.
+4. Run **Start-Bridge.cmd**. Requires Python 3.9 or later, with no extra packages to play. Authorize **PZPearCarRadio** when prompted and keep the bridge open. Never share tokens or credentials.
+5. Start Zomboid and enable **Muldraugh Afterdark FM**. For an existing save, use **Load → More → Choose mods**. A test save is recommended.
+6. Enter a car with an installed radio and a charged battery. Open its radio from the vehicle menu (`V`) and switch it on. Select **94.46 MHz Afterdark FM** under **Channel**, then press **Tune in**. The panel also has a **Tune to Afterdark FM** shortcut.
+7. Use the normal radio volume control and **Previous / Pause / Next**. Unpause the game to play music.
 
-La frecuencia sintonizada se guarda con la radio. Cambiar a otra emisora pausa Pear y devuelve el audio normal del juego; el botón **Volver a la emisora anterior** hace ese cambio directamente. **Al bajar del coche la música sigue sonando** si la radio permanece encendida, con energía y en Afterdark FM. Al morir o salir de la partida, el puente pausa lo que controlaba. Si el juego deja de enviar señales durante 3 segundos, el puente también pausa. Al pausar Zomboid puede haber ese pequeño retraso. Para detener el puente usa **Ctrl+C** en su ventana; un cierre forzado del proceso puede impedir la pausa final.
+Stop the bridge with **Ctrl+C**. Forcefully terminating its process can prevent the final pause command.
 
-Fuera del coche, el volumen disminuye con la distancia: al 100% se oye hasta unas 35 casillas; a menor volumen, el alcance también disminuye. Dentro se mantiene el volumen seleccionado. Fuera del alcance, la canción sigue avanzando en silencio mientras el coche esté cargado en el mundo. Si el juego descarga o elimina el coche, se pausa y se olvida esa fuente hasta que vuelvas a subir a él. El mod recuerda solo el último coche usado durante esta sesión; entrar en otro coche cambia la fuente y no mezcla ambas radios. No descubre automáticamente coches lejanos al cargar una partida a pie.
+## Radio behavior
 
-Afterdark FM usa **94.46 MHz** por defecto. Si otra emisora ocupa esa posición, elige otra frecuencia libre manteniendo el decimal `.46` (por ejemplo, 95.46 MHz). El desplegable muestra los dos decimales. No sobrescribe emisoras de otros mods. Se agrega un preset al abrir la radio; si todos los espacios están llenos, conserva los existentes y permite sintonizar con el botón del panel. Libera un espacio y vuelve a abrir la radio para añadir el preset al desplegable.
+The frequency is saved with the radio. Switching stations pauses Pear and restores normal radio audio. **Return to previous station** switches back directly.
 
-Mientras el mod sigue el coche sintonizado en Afterdark FM, dentro o fuera, mantiene una señal local en esa radio para evitar que el motor genere texto de estática como `<wzzt>`. No modifica el diálogo de personajes ni el de otras radios, y no accede a `ChatElement`, que no está expuesto a Lua en B42.21. Si el motor no permite actualizar esa señal, el mod desactiva solo esa función y mantiene los controles y el puente. El texto de estática que ya estuviera en pantalla puede durar hasta que expire normalmente. Es una emisora local de control: no emite música por el sistema de transmisiones del juego ni añade MP. La señal local también utiliza la reacción de ruido nativa de una radio encendida.
+**Music continues after you leave the car** while its radio is powered, switched on and tuned to Afterdark FM. Outside volume fades with distance: at full volume, the approximate range is 35 tiles; lower volume reduces the range. Inside, the selected volume is preserved. Walls, windows and stereo direction are not simulated.
 
-**La música atrae zombis**: activado por defecto, configurable en **Opciones → Mods → Muldraugh Afterdark FM**. Agrega ruido en la posición del coche solo cuando Pear confirma reproducción. Alcance experimental: hasta 35 casillas al 100%; no garantiza una cantidad de zombis. Alejarte baja lo que escuchas tú, pero no reduce el ruido que produce el coche para los zombis. Se suma al ruido normal del coche/radio y debe ajustarse jugando. Silenciar Pear manualmente no cambia automáticamente el ruido: usa el volumen o pausa del coche.
+Beyond hearing range, the song advances silently while the car remains loaded. If the game unloads or removes it, playback pauses and the source is forgotten until you enter the car again. Only the last car used during the session is tracked. Entering another car changes the source; radios are not mixed. Loading a save on foot does not discover nearby cars automatically.
 
-## Límites actuales
+Death, leaving the game or losing the mod heartbeat pauses controlled playback. Heartbeats expire after three seconds. The bridge restores Pear's previous numeric volume when releasing control, but not its previous song, queue or playback state. It never changes Windows volume.
 
-- Solo singleplayer, jugador local 0. El mod no añade el panel ni controla Pear en multijugador. Pantalla dividida no soportada.
-- Selección de canción/playlist **en Pear**. Pegar un enlace dentro del juego queda pendiente; la propuesta upstream [#4615](https://github.com/pear-devs/pear-desktop/pull/4615) aún no está integrada en el código revisado.
-- Un coche audible por jugador, con volumen según distancia al salir. Sin sonido direccional, efectos de paredes/ventanas ni mezcla de varias radios. Al sintonizar Afterdark FM se silencia el emisor de esa radio para evitar voces y estática; se puede desactivar en Opciones → Mods. Al cambiar de emisora se restaura el emisor original.
-- Requiere Pear y este puente abiertos. Workshop por sí solo no iniciará el programa auxiliar.
-- El puente cambia el volumen de Pear durante el uso y restaura el volumen numérico anterior al dejar de controlar el coche. No restaura la canción/cola ni el estado de reproducción anterior. No modifica el volumen general de Windows.
-- Si pausas manualmente en Pear, el mod no pelea continuamente con tu decisión. Usa **Pausa → Seguir** en el coche para reanudar. El estado visual puede tardar alrededor de un segundo más el tiempo de carga de Pear.
-- Carga de canciones, acceso a contenido y sesión de Google dependen de Pear. El mod no usa contraseñas de Google.
+Pausing directly in Pear is respected. Use **Pause**, then **Resume** in the car to restart playback. Display updates can take about a second plus loading time. Escape-menu pause behavior still needs refinement and can differ from the game speed controls.
 
-## Actualizar
+## Frequency and world noise
 
-Para pasar a **0.4.0**, instala la copia nueva y reinicia Zomboid. El mod aparece como **Muldraugh Afterdark FM** y la emisora como **94.46 MHz Afterdark FM**. Al abrir una radio con el preset anterior **Pear FM**, se actualiza su nombre y frecuencia en el mismo espacio y se resintoniza si estaba seleccionado. El ID técnico `PearCarRadio`, las opciones guardadas y los archivos del puente se conservan para mantener compatibilidad con partidas existentes. El puente puede seguir abierto. El soporte multijugador sigue pendiente.
+Afterdark FM prefers **94.46 MHz**. If occupied, it picks another free frequency ending in `.46`, such as 95.46 MHz. The dropdown displays both decimal places. Other stations are not overwritten.
 
-Cierra Zomboid y el puente (Ctrl+C) y abre de nuevo ambos después de instalar la copia nueva. La versión 0.1.1 usa archivos `.txt`: Build 42.21 bloqueaba silenciosamente la escritura del antiguo `.control`. El archivo `.status` antiguo ya no se utiliza. No basta con volver a abrir la ventana de radio: hay que reiniciar el juego. Despausa la partida para reproducir y cambiar canciones.
+A preset is added when you open the radio. If all slots are occupied, existing presets are preserved and the panel shortcut still works. Free a slot and reopen the radio to add the dropdown entry.
 
-## Diagnóstico
+The tracked radio receives a local signal to prevent new static text such as `<wzzt>`. Other radios and character speech are unchanged. The mod avoids `ChatElement`, which is not exposed to Lua in Build 42.21. Unsupported signal updates disable only this optional feature; playback and controls continue. Existing text expires normally. This signal also uses the engine's native radio noise behavior.
 
-| Síntoma | Revisar |
+**Music attracts zombies** by default; configure it in **Options → Mods → Muldraugh Afterdark FM**. Additional noise is generated at the car while Pear confirms playback, reaching roughly 35 tiles at full volume. Walking away reduces what you hear, not what zombies hear at the car. This adds to normal vehicle/radio noise and does not guarantee a zombie count. Muting Pear manually does not automatically change world noise; use the car's volume or pause controls.
+
+Original radio voices and static audio are muted on Afterdark FM. This is configurable in the mod options; switching stations restores the original emitter.
+
+## Limitations
+
+- Singleplayer, local player 0 only. Multiplayer and split-screen are not supported yet.
+- Select music **in Pear**. Loading links from the game is pending; upstream playlist API work is tracked in [Pear #4615](https://github.com/pear-devs/pear-desktop/pull/4615).
+- Pear and the bridge must stay open. Workshop alone will not launch the bridge.
+- Playback, content availability and account access depend on Pear. The mod never receives your Google password.
+
+## Updating
+
+**0.4.1** uses English UI, logs, documentation and script names. Use **Start-Bridge.cmd** and **Install-Mod.ps1** instead of the previous Spanish filenames. Restart Zomboid to reload the mod, and restart the bridge to apply translated messages.
+
+The old **Pear FM** preset is renamed and moved in place when its radio is opened. A tuned legacy preset is retuned too. The mod ID `PearCarRadio`, saved option keys, authorization client ID `PZPearCarRadio`, and bridge filenames remain unchanged for compatibility.
+
+Versions before 0.1.1 used an unsupported `.control` extension. Current versions use `.txt` because Build 42.21 restricts Lua writes. The old `.status` file is unused. Version 0.3.1 removed the invalid `ChatElement.clear` call that caused repeated errors.
+
+## Troubleshooting
+
+| Symptom | Check |
 | --- | --- |
-| No aparece el mod | Reiniciar Zomboid y activarlo también en la partida; usar Build 42.20+ |
-| No aparece el panel | Estar sentado en un vehículo con radio instalada; abrir la ventana de radio y desplegar Muldraugh Afterdark FM |
-| Puente sin conexión | Abrir Pear, habilitar API Server, comprobar puerto/hostname y aceptar PZPearCarRadio |
-| Ventana negra dice «Select» y el estado no cambia | Pulsa Esc en esa ventana: seleccionar texto en la consola de Windows puede suspender el puente. La versión actual desactiva QuickEdit al iniciarse; reinicia solo el puente para aplicar ese cambio |
-| API responde pero no hay música | Reproducir una canción manualmente en Pear, comprobar batería y radio encendida; pulsar Pausa y Seguir |
-| Funciona en el puente pero el juego no lo ve | Ambos deben usar el mismo directorio Zomboid; revisar `Zomboid/Lua/PearCarRadio.status.txt` |
-| Error Lua | Revisar `%USERPROFILE%\Zomboid\console.txt` y buscar `PearCarRadio` |
+| Mod missing | Restart Zomboid, use Build 42.20+ and enable the mod for the save too |
+| Panel missing | Sit in a car with an installed radio, open its radio window and expand the mod panel |
+| Bridge offline | Open Pear, enable API Server, match host/port and authorize PZPearCarRadio |
+| Console title says "Select" and updates stop | Press Esc in that window; Windows text selection can suspend the process. Current versions disable QuickEdit at startup |
+| API responds but music is silent | Play a song manually in Pear; check battery, power and pause state, then press Pause and Resume |
+| Bridge works but game cannot see it | Use the same Zomboid directory for both; inspect `Zomboid/Lua/PearCarRadio.status.txt` |
+| Lua errors | Search `%USERPROFILE%\Zomboid\console.txt` for `PearCarRadio` |
 
-Para un directorio Zomboid personalizado, instala con `-ZomboidDir 'D:\MiZomboid'` y lanza el puente con `Iniciar-Puente.cmd --zomboid-dir "D:\MiZomboid"`. Para otro puerto usa `--port 26539` y el mismo puerto en Pear.
+For a custom directory, install with `-ZomboidDir 'D:\MyZomboid'` and launch with `Start-Bridge.cmd --zomboid-dir "D:\MyZomboid"`. For another port, pass `--port 26539` and configure the same port in Pear.
 
-## Desarrollo y comprobación
+## Development
 
-`python -m unittest discover -s tests -v`
+Code, comments, UI strings, logs, documentation and commit messages use English.
 
-Los tests verifican el protocolo de archivos, las peticiones HTTP y el control de reproducción con un servidor Pear simulado. No sustituyen una prueba con el juego y Pear reales. El puente usa exclusivamente la biblioteca estándar de Python. El mod añade un módulo a `ISRadioWindow` conservando los módulos originales; utiliza las funciones de archivos de Lua del juego para evitar llamadas de red desde el hilo principal.
+Run `python -m unittest discover -s tests -v`. To enable the optional Lua 5.1 harness, install `python -m pip install --target .tools lupa` and rerun. This dependency is for development only.
 
-El intercambio usa `Zomboid/Lua/PearCarRadio.control.txt` y `PearCarRadio.status.txt`. Cada estado tiene sesión, contador y marca final de escritura; las órdenes antiguas o incompletas se descartan. El puente requiere estado fresco para tomar control de Pear y no repite una orden si pierde la respuesta. Pulsaciones muy rápidas pueden combinarse: espera un instante entre cambios de canción. Un bloqueo del sistema impide abrir dos puentes para el mismo directorio Zomboid.
+Tests cover file snapshots, HTTP requests, simulated Pear playback and Lua behavior against a game API harness. They do not replace actual game/Pear testing. The bridge uses Python's standard library. The mod extends `ISRadioWindow` and exchanges files to keep network requests off the game thread.
 
-Para ejecutar también el arnés opcional de Lua 5.1: `python -m pip install --target .tools lupa`, luego vuelve a ejecutar los tests. Esa dependencia solo se usa durante el desarrollo; no hace falta para jugar.
+The protocol uses `Zomboid/Lua/PearCarRadio.control.txt` and `PearCarRadio.status.txt`. Snapshots include a session, counter and final write marker. Incomplete/stale commands are rejected. The bridge requires fresh state before taking control and does not repeat a button after losing its response. Very fast presses can collapse into one action. An OS lock prevents duplicate bridges for the same Zomboid directory.
 
-Próximas etapas: apertura de canción/playlist por enlace, suavizar volumen por distancia y coordinar canción/tiempo entre clientes MP. El ruido del mundo deberá controlarlo el servidor en esa futura versión.
+Next steps: in-game links, refined Escape-menu behavior, and multiplayer song/time coordination. World noise must be server-controlled in multiplayer.

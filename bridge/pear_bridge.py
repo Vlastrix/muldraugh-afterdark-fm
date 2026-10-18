@@ -95,20 +95,20 @@ class PearAPI:
                 self.token = None
             raise PearError("Pear HTTP {}: {}".format(error.code, path)) from error
         except (URLError, TimeoutError, OSError, ValueError) as error:
-            raise PearError("Sin respuesta valida de Pear: {}".format(error)) from error
+            raise PearError("No valid response from Pear: {}".format(error)) from error
 
     def connect(self):
         # This is the only request allowed to wait for Pear's authorization dialog.
-        LOG.info("Conectando a Pear. Si aparece un aviso, autoriza PZPearCarRadio.")
+        LOG.info("Connecting to Pear. If prompted, authorize PZPearCarRadio.")
         auth = self.request("POST", "/auth/PZPearCarRadio", timeout=60)
         if not isinstance(auth, dict) or not auth.get("accessToken"):
-            raise PearError("Pear no entrego un token de acceso")
+            raise PearError("Pear did not return an access token")
         self.token = auth["accessToken"]
 
     def get(self, endpoint):
         result = self.request("GET", "/api/v1/" + endpoint)
         if result is not None and not isinstance(result, dict):
-            raise PearError("Pear devolvio un estado inesperado: " + endpoint)
+            raise PearError("Pear returned an unexpected state: " + endpoint)
         return result
 
     def post(self, endpoint, data=None):
@@ -207,7 +207,7 @@ class RadioController:
             if state:
                 self.session = state["session"]
                 self.last_action = (state["session"], state["action_id"])
-            return self.status("Listo. Activa Pear en la radio del coche.")
+            return self.status("Ready. Tune the car radio to Afterdark FM.")
 
         if state["session"] != self.session:
             self.release()
@@ -243,13 +243,13 @@ class RadioController:
             self.song = self.api.get("song") or {}
             self.last_poll = now
         if not self.song.get("videoId"):
-            message = "Abre y reproduce una cancion o playlist en Pear."
+            message = "Open and play a song or playlist in Pear."
         elif not state["playing"]:
-            message = "En pausa: revisa encendido y controles del coche."
+            message = "Paused: check the car radio power and controls."
         elif self.song.get("isPaused") is not False:
-            message = "Pear en pausa o cargando. Pulsa Pausa y Seguir."
+            message = "Pear is paused or loading. Press Pause, then Resume."
         else:
-            message = "Reproduciendo desde Pear."
+            message = "Playing from Pear."
         return self.status(message, state["playing"])
 
     def status(self, message, desired_playing=False):
@@ -266,22 +266,22 @@ def main():
     parser.add_argument("--port", type=int, default=26538)
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
-        parser.error("El puerto debe estar entre 1 y 65535")
+        parser.error("Port must be between 1 and 65535")
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
     if disable_console_selection():
-        LOG.info("Seleccion por raton desactivada para evitar que la consola pause el puente.")
+        LOG.info("Mouse selection disabled to prevent the console from suspending the bridge.")
     folder = args.zomboid_dir / "Lua"
     folder.mkdir(parents=True, exist_ok=True)
     try:
         instance_lock = BridgeLock(folder / "PearCarRadio.lock")
     except OSError:
-        LOG.error("Ya hay un puente abierto o no se puede bloquear su archivo. Cierra el otro puente.")
+        LOG.error("Another bridge is running or its lock file is unavailable. Close the other bridge.")
         return 1
     api = PearAPI(args.port)
     controller = RadioController(api)
     controls = ControlReader(folder / CONTROL_FILE)
-    LOG.info("Puente SP. Archivos: %s", folder)
-    LOG.info("Abre Pear, activa API Server y selecciona una cancion o playlist.")
+    LOG.info("Singleplayer bridge. Files: %s", folder)
+    LOG.info("Open Pear, enable API Server and select a song or playlist.")
     last_error = None
     next_connect = 0.0
     last_message = None
@@ -302,11 +302,11 @@ def main():
                 state = controls.read()
                 status = controller.step(state, time.monotonic())
                 if state is None:
-                    status["message"] = "Sin senal reciente del mod. Reinicia Zomboid y activa Pear en el coche."
+                    status["message"] = "No recent mod signal. Restart Zomboid and tune to Afterdark FM."
                 last_error = None
             except PearError as error:
                 status = dict(connected="0", playing="0", session=controller.session,
-                              message="Sin conexion con Pear. Revisa API Server.", title="", artist="")
+                              message="Pear is offline. Check API Server.", title="", artist="")
                 if str(error) != last_error:
                     LOG.warning("%s", error)
                     last_error = str(error)
@@ -314,28 +314,28 @@ def main():
                 try:
                     write_status(folder / STATUS_FILE, status)
                 except OSError as file_error:
-                    LOG.warning("No se pudo escribir estado: %s", file_error)
+                    LOG.warning("Could not write status: %s", file_error)
                 time.sleep(2)
                 continue
             try:
                 write_status(folder / STATUS_FILE, status)
             except OSError as error:
-                LOG.warning("No se pudo escribir estado: %s", error)
+                LOG.warning("Could not write status: %s", error)
             if status["message"] != last_message:
                 LOG.info("%s", status["message"])
                 last_message = status["message"]
             time.sleep(0.25)
     except KeyboardInterrupt:
-        LOG.info("Cerrando puente...")
+        LOG.info("Stopping bridge...")
     finally:
         try:
             controller.release()
         except PearError as error:
-            LOG.warning("No se pudo pausar Pear al cerrar: %s", error)
+            LOG.warning("Could not pause Pear on shutdown: %s", error)
         try:
             write_status(folder / STATUS_FILE, dict(
                 connected="0", playing="0", session=controller.session,
-                message="Puente detenido.", title="", artist=""))
+                message="Bridge stopped.", title="", artist=""))
         except OSError:
             pass
         instance_lock.close()
