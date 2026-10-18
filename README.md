@@ -78,9 +78,9 @@ For a custom user directory or API port, use the connector's **Settings** before
 
 ## Development
 
-See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) and [multiplayer radio test](docs/RADIO_TEST.md) for the experimental branch. The user confirmed two-player tone and Pear audio over the game's existing connection in 0.6.2-dev. Version 0.7.3-dev adds car and placed-radio sessions; those game interactions still need live validation. The diagnostic [audio lab](docs/AUDIO_LAB.md) and [game network lab](docs/GAME_LAB.md) remain available. The public v0.5.1 release supports singleplayer only.
+See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) and [multiplayer radio test](docs/RADIO_TEST.md) for the experimental branch. The user confirmed two-player tone and Pear audio over the game's existing connection in 0.6.2-dev. Version 0.7.4-dev adds car and placed-radio sessions; those game interactions still need live validation. The diagnostic [audio lab](docs/AUDIO_LAB.md) and [game network lab](docs/GAME_LAB.md) remain available. The public v0.5.1 release supports singleplayer only.
 
-The experimental audio build requires Python 3.12 with `requirements-build.txt`; the singleplayer CLI still uses Python 3.9 or later. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the published singleplayer app when available. The experimental app builds separately under `dist/0.7.3-dev`.
+The experimental audio build requires Python 3.12 with `requirements-build.txt`; the singleplayer CLI still uses Python 3.9 or later. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the published singleplayer app when available. The experimental app builds separately under `dist/0.7.4-dev`.
 
 Build the Windows download and separate Workshop package with `powershell -ExecutionPolicy Bypass -File .\Build-Release.ps1`. This creates an isolated build environment and bundles Python and Tcl/Tk into the EXE using PyInstaller. A GitHub Actions workflow also builds on manual dispatch or version tags. See [publishing](docs/PUBLISHING.md) for the upload checklist. Built artifacts and local credentials are excluded from Git.
 
@@ -92,4 +92,4 @@ The protocol uses `Zomboid/Lua/PearCarRadio.control.txt` and `PearCarRadio.statu
 
 Next steps: live multiplayer radio validation, owner monitoring volume, held inventory radios, in-game links and refined Escape-menu behavior.
 
-The Connector starts disconnected. Use Connect in the Singleplayer section for solo play, or **Multiplayer radios (Steam)** for in-game multiplayer radios. **Multiplayer audio (LAN)** shares audio directly with an invitation, without in-game radio controls. Developer transport tests remain available through the --game-lab command-line option.
+The Connector starts disconnected. Use Connect in the Singleplayer section for solo play, or **Multiplayer radios (Steam)** for in-game multiplayer radios. Developer transport tests remain available through the --game-lab command-line option.

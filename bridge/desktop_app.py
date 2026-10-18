@@ -15,7 +15,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.7.3-dev"
+VERSION = "0.7.4-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -92,8 +92,7 @@ class ConnectorWindow:
         mode_buttons = ttk.Frame(modes)
         mode_buttons.pack(fill="x")
         ttk.Button(mode_buttons, text="Multiplayer radios (Steam)", command=lambda: self.open_lab('--radio')).pack(side="left")
-        ttk.Button(mode_buttons, text="Multiplayer audio (LAN)", command=self.open_audio_lab).pack(side="left", padx=8)
-        ttk.Label(modes, text="Steam: control in-game radios through Zomboid's server connection.\nLAN: share audio directly using an invitation; no in-game radio controls.", wraplength=565).pack(anchor="w", pady=(8, 0))
+        ttk.Label(modes, text="Control in-game radios through Zomboid's server connection.", wraplength=565).pack(anchor="w", pady=(8, 0))
         self.settings = ttk.LabelFrame(body, text="Singleplayer settings", padding=10)
         self.settings.pack(fill="x", pady=(0, 10))
         self.settings.columnconfigure(1, weight=1)
@@ -115,9 +114,6 @@ class ConnectorWindow:
         selected = filedialog.askdirectory(title="Select your Zomboid user folder", initialdir=self.directory.get())
         if selected:
             self.directory.set(selected)
-
-    def open_audio_lab(self):
-        self.open_lab('--audio-lab')
 
     def open_lab(self, mode):
         if self.worker and self.worker.is_alive():

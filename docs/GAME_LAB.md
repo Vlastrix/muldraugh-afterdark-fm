@@ -1,6 +1,6 @@
 # Game network lab: test without a separate VPN
 
-This is an experimental test of audio over Project Zomboid's existing mod-command connection, targeting Build 42.21. The user confirmed the 0.6.2-dev tone and Pear music between two players on October 18, 2026. Radio integration in 0.7.3-dev still needs live testing; see [Multiplayer radio test](RADIO_TEST.md). The public v0.5.1 release does not include it.
+This is an experimental test of audio over Project Zomboid's existing mod-command connection, targeting Build 42.21. The user confirmed the 0.6.2-dev tone and Pear music between two players on October 18, 2026. Radio integration in 0.7.4-dev still needs live testing; see [Multiplayer radio test](RADIO_TEST.md). The public v0.5.1 release does not include it.
 
 No audio IP address, invitation, port forwarding or VPN is configured in Connector for this mode. Both players must already be able to join the same Zomboid server through the game's normal network setup. Listeners do not need Pear. The test server forwards encoded batches in Lua and needs no Pear, Connector or external audio service.
 
@@ -8,12 +8,12 @@ No audio IP address, invitation, port forwarding or VPN is configured in Connect
 
 The build produces two downloads for this experiment:
 
-- `AfterdarkFMConnector-Windows-0.7.3-dev.zip`: extract the entire ZIP on both computers. Run `AfterdarkFMConnector.exe`.
-- `MuldraughAfterdarkFM-Game-Test-0.7.3-dev.zip`: extract its `AfterdarkGameLab` folder into each client's user `Zomboid/mods` directory. Install that folder in the test server's user `Zomboid/mods` directory too if the server uses another machine/user folder.
+- `AfterdarkFMConnector-Windows-0.7.4-dev.zip`: extract the entire ZIP on both computers. Run `AfterdarkFMConnector.exe`.
+- `MuldraughAfterdarkFM-Game-Test-0.7.4-dev.zip`: extract its `AfterdarkGameLab` folder into each client's user `Zomboid/mods` directory. Install that folder in the test server's user `Zomboid/mods` directory too if the server uses another machine/user folder.
 
 The test mod has its own **local Mod ID `AfterdarkGameLab`**, named **Muldraugh Afterdark FM Game Lab [B42.21]**. This is not a second Workshop item. It avoids replacing the subscribed public `PearCarRadio` copy. Do not publish the test package as verified multiplayer support.
 
-Close the game before installing or updating. On the host, the developer helper `powershell -ExecutionPolicy Bypass -File .\Install-GameLab.ps1` installs the built test mod. Alternatively copy `dist/0.7.3-dev/Test-Mod/AfterdarkGameLab` into `Zomboid/mods` manually.
+Close the game before installing or updating. On the host, the developer helper `powershell -ExecutionPolicy Bypass -File .\Install-GameLab.ps1` installs the built test mod. Alternatively copy `dist/0.7.4-dev/Test-Mod/AfterdarkGameLab` into `Zomboid/mods` manually.
 
 Enable the Game Lab mod in the hosted test server's mod settings. On a dedicated server, add `AfterdarkGameLab` to its `Mods` setting and install the same local files; no new `WorkshopItems` entry is needed. Clients must have matching files. Restart the server and clients after changes. Use a test world with the lab enabled. Restart to load updated files. Do not enable a full local experimental `PearCarRadio` copy alongside the standalone lab: both contain these transport scripts. The subscribed public v0.5.1 mod can remain installed.
 

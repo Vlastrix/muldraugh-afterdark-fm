@@ -17,7 +17,7 @@ The prototype uses 48 kHz stereo int16 PCM in 20 ms frames, independently compre
 Use the same trusted LAN or an existing private VPN. There is no relay, NAT traversal or automatic discovery. Do not expect an invitation containing a private LAN address to work over the public Internet.
 
 1. Close the old Connector on the sender so its singleplayer bridge does not change Pear volume. Keep Pear playing a song at an audible volume. The audio lab does not call Pear's API or change its volume.
-2. Open the experimental `AfterdarkFMConnector.exe`, disconnect the normal singleplayer bridge, then click **Multiplayer audio (LAN)**. From source, use `python bridge/desktop_app.py --audio-lab`.
+2. This developer-only tool is not shown in the Connector menu. Close other Connector sessions and launch `AfterdarkFMConnector.exe --audio-lab`. From source, use `python bridge/desktop_app.py --audio-lab`.
 3. On the sender, select **Share my Pear**, press **Refresh**, and choose Pear's process. Check the LAN/VPN address and use the default port `26539`. Press **Start**. The capture peak indicates whether samples are arriving.
 4. Copy the invitation privately to the listener. If Windows Firewall prompts on the sender, allow the app on the private network used for this test. The app does not configure firewall/router rules automatically.
 5. On the second computer, open the same lab, select **Listen (no Pear required)**, paste the invitation and press **Start**. Start with low listener volume and adjust the slider.
