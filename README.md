@@ -16,7 +16,7 @@ You need three parts: the **[Workshop mod](https://steamcommunity.com/sharedfile
    ![Pear Desktop Plugins menu with API Server [Beta] enabled and its Hostname, Port and Authorization strategy settings](assets/pear-api-server.png)
 
 3. Subscribe to the game mod in Workshop. Enable only one copy of the mod; remove local development copies before testing a Workshop download.
-4. Extract the Windows Connector ZIP and double-click **AfterdarkFMConnector.exe**. It connects automatically. Authorize **PZPearCarRadio** in Pear when prompted and keep the app open.
+4. Extract the Windows Connector ZIP and double-click **AfterdarkFMConnector.exe**. In the development build, press **Connect** under **Singleplayer**. Authorize **PZPearCarRadio** in Pear when prompted and keep the app open.
 5. Start Zomboid and enable **Muldraugh Afterdark FM**. For an existing save, use **Load → More → Choose mods**. A test save is recommended.
 6. Enter a car with an installed radio and a charged battery. Open its radio from the vehicle menu (`V`) and switch it on. Select **94.46 MHz Afterdark FM** under **Channel**, then press **Tune in**. The panel also has a **Tune to Afterdark FM** shortcut.
 7. Use the normal radio volume control and **Previous / Pause / Next**. Unpause the game to play music.

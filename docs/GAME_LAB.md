@@ -19,7 +19,7 @@ Enable the Game Lab mod in the hosted test server's mod settings. On a dedicated
 
 ## First test: solo server round trip, no Pear required
 
-You can begin without a friend. Install and enable the local test mod, host a fresh multiplayer test world, open the experimental Connector, disconnect the normal bridge and click **Game lab**. Select **Send test tone** and press **Start**.
+You can begin without a friend. Install and enable the local test mod, host a fresh multiplayer test world, open the experimental Connector, disconnect the normal bridge and click **Game network test**. Select **Send test tone** and press **Start**.
 
 The **Prepared**, **Game sent** and **Confirmed echo** counters should increase. Prepared counts locally encoded batches; Game sent counts submissions by Lua to the game transport. The server returns each synthetic audio batch, and the client compares it with the original local snapshot. This checks the existing game connection in both directions without another player. The sender does not play the echoed tone locally, so this solo check is intentionally silent. A successful echo does not establish playback on another computer or acceptable Internet performance.
 
@@ -30,7 +30,7 @@ For the next live check, restart the Connector, game and test server after updat
 ## Second test: two computers, no Pear required
 
 1. Host a Build 42.21 multiplayer test world with the Game Lab mod enabled. Your friend joins normally through Zomboid/Steam.
-2. Both players open the experimental Connector. Disconnect its normal singleplayer bridge, then click **Game lab**. Check that the **Zomboid user folder** matches the running game on each computer.
+2. Both players open the experimental Connector. Disconnect its normal singleplayer bridge, then click **Game network test**. Check that the **Zomboid user folder** matches the running game on each computer.
 3. On the receiving computer, leave **Listen** selected and press **Start**.
 4. On the sending computer, select **Send test tone** and press **Start**. The source is a quiet generated 440 Hz tone; it does not capture desktop sound.
 5. The sender should show **Sending through the game connection**. The listener should show **Receiving through the game connection**, hear the tone and see the received-batch counter increase. Adjust the listener volume slider locally.
