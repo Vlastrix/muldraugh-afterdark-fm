@@ -1,5 +1,7 @@
 # Publishing the Windows Connector and Steam Workshop mod
 
+Published on October 18, 2026: [GitHub prerelease v0.8.0-beta.1](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases/tag/v0.8.0-beta.1) and [existing Workshop item 3821956623](https://steamcommunity.com/sharedfiles/filedetails/?id=3821956623). The three public GitHub downloads were checked against local SHA-256 hashes. Steam returned a successful update result; public metadata, release link and the exact blue preview PNG were verified. All 98 tests passed in the streaming build environment; packaged GUI/native/codec smoke checks passed. This publication check does not replace subscribed-package testing inside the actual game.
+
 Version **0.8.0-beta.1** is a prerelease for Build 42.21 with singleplayer behavior and experimental multiplayer car audio/shared controls confirmed by two players. Latest volume/tuning fixes, placed radios and dedicated servers still need live testing. Keep those limits explicit in the release and Workshop description.
 
 The packages are separate. The installed game's Workshop validator rejects executable file types, including `.exe` and `.dll`. Never put the connector inside `Contents`. Players download the connector from GitHub and subscribe to the game mod in Workshop.
