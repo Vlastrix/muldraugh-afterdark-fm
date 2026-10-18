@@ -6,6 +6,8 @@ Status: the standalone audio-streaming prototype is implemented on `feature/mult
 
 The experimental Connector contains an [audio lab](AUDIO_LAB.md) with process-only Pear capture, a direct TLS sender, a listener that does not require Pear, invitation authentication, local output gain and bounded buffers. Automated local transport tests and a native synthetic two-process isolation test have passed. The packaged GUI and native imports have been smoke-tested. Actual Pear streaming between two computers, Internet connectivity, owner monitoring/gain behavior and game integration are still pending. The published singleplayer release remains separate from this prototype.
 
+The [game network investigation](GAME_NETWORK_RESEARCH.md) found a candidate path through the exposed mod-command APIs and the game's existing client/server connection. The next transport experiment should prioritize this route so players do not need a separate VPN, extra audio port or independently reachable Connector. Its latency and gameplay impact still need live multiplayer measurements; the current direct TLS lab does not establish these.
+
 ## Goal
 
 Let the host and guests contribute music from their own Pear Desktop sessions, listen together through vehicle radios, and share playback controls. Keep development in the same repository and eventually update the existing Workshop item once both singleplayer and multiplayer have been tested.
@@ -42,7 +44,7 @@ Capture only Pear's process audio, including its relevant child processes, rathe
 
 Initially, Connector will render the received audio outside the game's sound engine. The mod supplies radio state and listener distance so Connector can apply the correct local gain. Feeding a live network stream directly into Zomboid's sound engine remains unverified and is not required for this first approach.
 
-Audio transport is separate from game control messages. Do not assume Zomboid exposes a suitable continuous-audio transport. Compare direct connections with a relay, including NAT traversal, upload bandwidth, hosting needs and session authentication. Select the transport after a small end-to-end prototype.
+Audio and control remain separate at the application/protocol level, but may share the game's existing connection. The selected next investigation is to carry small codec-compressed, Base64-encoded audio batches through `sendClientCommand` and targeted `sendServerCommand`, with server validation. The installed game's LuaNet utility already uses that route for forwarding. This is reliable mod-command delivery rather than a dedicated real-time audio channel, so performance must be measured before selecting it for release. Keep the direct TLS lab as a diagnostic transport and compare alternatives only if the game route fails the live test.
 
 Use bounded buffering and handle packet loss, jitter, late joins and disconnects without replaying stale audio. A streamed listener will hear the source with some delay; do not promise sample-accurate synchronization. The owner keeps the authoritative Pear queue, and shared buttons still control that Pear through its API.
 
@@ -68,7 +70,7 @@ World noise must be generated once by the server using vehicle power, radio volu
 ## Implementation sequence
 
 1. Build an audio prototype outside the game: capture only Pear in the owner's Connector, encode/transmit it, and play it in a second Connector on another computer without Pear installed. Validate latency, capture isolation, gain behavior and the owner's monitoring path before expanding the implementation.
-2. Choose the network transport and establish authenticated sessions. Implement a minimal two-player vehicle session where the server identifies the owner and eligible listeners, while audio flows between Connectors over the selected transport. Keep audio capture, networking and decoding off the game thread.
+2. Prototype the existing-game-connection route using small synthetic mod-command payloads, followed by codec-compressed synthetic audio. Validate it in a real two-player Steam session without a separate VPN or audio port. Measure delay, traffic limits and gameplay impact before implementing vehicle sessions. Keep capture, codec work and output off the game thread.
 3. Route shared playback buttons through the server to the owner. Verify ordering, permissions and stale-command rejection.
 4. Add **Use my Pear** ownership replacement and show the current owner. Check simultaneous requests and ensure the previous owner stops controlling the session.
 5. Add shared volume, listener distance attenuation and server-controlled zombie noise. Test leaving the car, power loss and station switching.
@@ -80,7 +82,7 @@ World noise must be generated once by the server using vehicle power, radio volu
 - Exact Project Zomboid multiplayer build and exposed client/server APIs to target.
 - Process-specific audio capture support, Pear subprocess selection and the minimum supported Windows version.
 - Codec, sample rate, bitrate, audio output library and redistribution of required runtime components.
-- Direct connections versus a relay, NAT traversal, relay hosting and bandwidth, session authentication and abuse limits.
+- Whether the existing game command connection can sustain usable audio without hurting gameplay; appropriate codec, batch sizes and message rates. A separate relay or NAT traversal is a fallback to evaluate, not a VPN requirement for players.
 - Separate capture gain from local listening gain, prevent the owner from hearing duplicate audio, and ensure capture is unaffected by the owner's distance from the car.
 - Pear API behavior for shared playback controls and metadata; arbitrary track opening and seeking are not prerequisites for listeners.
 - Source selection when several active vehicles are nearby, and behavior when a music owner is also near another owner's vehicle.
@@ -88,4 +90,4 @@ World noise must be generated once by the server using vehicle power, radio volu
 - How to display owner authorization/capture failures, network failures and listener output problems.
 - Whether to require confirmation or a short cooldown for ownership replacement.
 
-The next validation is the two-Connector audio lab on separate computers, with Pear installed only on the transmitting computer. Integrate it with vehicle sessions and remote controls after that works. Radios in the world and broader polish follow later.
+The next transport prototype is the game-command probe described in [network research](GAME_NETWORK_RESEARCH.md), followed by compressed audio over that route. Also validate actual Pear capture/output in the audio lab on separate computers, with Pear installed only on the transmitting computer. Integrate vehicle sessions and remote controls after transport and playback are verified. Radios in the world and broader polish follow later.

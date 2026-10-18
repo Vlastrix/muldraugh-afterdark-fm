@@ -80,6 +80,8 @@ For a custom user directory or API port, use the connector's **Settings** before
 
 See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) for shared-radio behavior, audio streaming between Connectors, milestones and open decisions. The `feature/multiplayer-audio` branch includes an experimental [audio lab](docs/AUDIO_LAB.md): only the sender needs Pear; listeners receive audio in Connector. Game multiplayer is not implemented, and the published v0.5.1 release remains singleplayer only.
 
+The [game network research](docs/GAME_NETWORK_RESEARCH.md) identifies a candidate audio route over Zomboid's existing mod-command connection, aiming to avoid a separate VPN or audio port. Live multiplayer performance has not been verified.
+
 Code, comments, UI strings, logs, documentation and commit messages use English.
 
 The experimental audio build requires Python 3.12 with `requirements-build.txt`; the singleplayer CLI still uses Python 3.9 or later. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the published singleplayer app when available. The experimental app builds separately under `dist/0.6.0-dev`.
