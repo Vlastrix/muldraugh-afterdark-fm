@@ -12,7 +12,7 @@ from game_audio import GameBridge
 
 
 class GameLabWindow:
-    def __init__(self, root, zomboid_dir=None):
+    def __init__(self, root, zomboid_dir=None, radio=False):
         self.root = root
         self.events = queue.Queue()
         self.worker = None
@@ -20,26 +20,31 @@ class GameLabWindow:
         self.closing = False
         self.output = None
         self.processes = []
-        self.role = tk.StringVar(value='listen')
+        self.role = tk.StringVar(value='radio' if radio else 'listen')
+        self.share_capable = tk.BooleanVar(value=False)
+        self.local_gain = 0.5
         self.folder = tk.StringVar(value=str(zomboid_dir or Path.home() / 'Zomboid'))
         self.process = tk.StringVar()
         self.status = tk.StringVar(value='Join the same server with the experimental mod installed, then press Start.')
         self.metrics = tk.StringVar(value='Waiting for game signal.')
         root.title('Afterdark FM Connector - Game network lab')
-        root.geometry('780x530')
+        root.geometry('820x600')
         root.minsize(720, 520)
         body = ttk.Frame(root, padding=22)
         body.pack(fill='both', expand=True)
         ttk.Label(body, text='Game network lab', font=('Segoe UI', 21, 'bold')).pack(anchor='w')
         ttk.Label(body, text='Experimental - audio through Zomboid, without an extra VPN or audio port', wraplength=730).pack(anchor='w', pady=(4, 12))
-        ttk.Label(body, text='This is a shared test channel, not a vehicle radio. Only players who press Start participate.\nTest tone works without Pear on either computer. Pear is needed only for Share my Pear.', wraplength=730).pack(anchor='w')
+        ttk.Label(body, text='Radio mode follows car and placed radios automatically. Only a music owner needs Pear.\nListen, Send test tone and Share my Pear are the separate shared-channel transport tests.', wraplength=730).pack(anchor='w')
         roles = ttk.Frame(body)
         roles.pack(fill='x', pady=14)
         self.radios = []
-        for label, role in [('Listen', 'listen'), ('Send test tone', 'tone'), ('Share my Pear', 'share')]:
+        for label, role in [('Radio', 'radio'), ('Listen', 'listen'), ('Send test tone', 'tone'), ('Share my Pear', 'share')]:
             button = ttk.Radiobutton(roles, text=label, variable=self.role, value=role, command=self.refresh)
             button.pack(side='left', padx=(0, 20))
             self.radios.append(button)
+        self.share_check = ttk.Checkbutton(body, text='Allow Use my Pear in Radio mode (requires Pear API authorization)',
+                                          variable=self.share_capable, command=self.refresh)
+        self.share_check.pack(anchor='w', pady=(0, 10))
         settings = ttk.Frame(body)
         settings.pack(fill='x')
         settings.columnconfigure(1, weight=1)
@@ -65,7 +70,7 @@ class GameLabWindow:
         self.volume.pack(fill='x', pady=6)
         ttk.Label(body, textvariable=self.status, wraplength=730).pack(anchor='w', pady=(10, 6))
         ttk.Label(body, textvariable=self.metrics, wraplength=730).pack(anchor='w')
-        ttk.Label(body, text='Use the test mod on both clients AND the server. The public Workshop version does not contain this transport.\nKeep the normal singleplayer bridge disconnected. Stop the source before another player starts sharing.', wraplength=730).pack(anchor='w', pady=14)
+        ttk.Label(body, text='Use the test mod on both clients AND the server. Keep the singleplayer bridge disconnected.\nIn Radio mode, tune a powered radio to Afterdark FM, then press Use my Pear.\nThe owner currently hears Pear directly; distance gain applies to remote listeners.', wraplength=730).pack(anchor='w', pady=14)
         root.protocol('WM_DELETE_WINDOW', self.close)
         root.after(100, self.poll)
 
@@ -75,7 +80,7 @@ class GameLabWindow:
             self.folder.set(folder)
 
     def refresh(self):
-        sharing = self.role.get() == 'share'
+        sharing = self.role.get() == 'share' or (self.role.get() == 'radio' and self.share_capable.get())
         self.process_combo.configure(state='readonly' if sharing else 'disabled')
         self.refresh_button.configure(state='normal' if sharing else 'disabled')
         if sharing:
@@ -91,6 +96,7 @@ class GameLabWindow:
                 self.status.set(str(error))
 
     def change_gain(self, value):
+        self.local_gain = float(value)
         if self.output is not None:
             self.output.gain = float(value)
 
@@ -101,7 +107,7 @@ class GameLabWindow:
         try:
             if not folder.is_absolute():
                 raise ValueError('Choose an absolute Zomboid user folder.')
-            if role == 'share':
+            if role == 'share' or (role == 'radio' and self.share_capable.get()):
                 index = self.process_combo.current()
                 if index < 0:
                     raise ValueError('Select a Pear process first.')
@@ -112,7 +118,7 @@ class GameLabWindow:
         self.stop_event = threading.Event()
         self.start_button.configure(state='disabled')
         self.stop_button.configure(state='normal')
-        for widget in self.radios + [self.folder_entry, self.browse_button, self.process_combo, self.refresh_button]:
+        for widget in self.radios + [self.share_check, self.folder_entry, self.browse_button, self.process_combo, self.refresh_button]:
             widget.configure(state='disabled')
         gain = float(self.volume.get())
         self.status.set('Waiting for the experimental mod and a game server...')
@@ -125,6 +131,12 @@ class GameLabWindow:
             errors = queue.Queue()
             error = None
             try:
+                if role == 'radio':
+                    from radio_audio import run_radio
+                    run_radio(folder, process, self.stop_event,
+                              lambda state: self.events.put(('state', state)),
+                              lambda output: setattr(self, 'output', output), lambda: self.local_gain)
+                    return
                 bridge = GameBridge(folder, role)
                 if role == 'listen':
                     output = AudioOutput()
@@ -223,7 +235,7 @@ class GameLabWindow:
                               'connecting': 'Waiting for server transport. Check that the test mod is enabled on the server.',
                               'listening': 'Receiving through the game connection.', 'busy': 'Another player is sharing. Stop and choose Listen.',
                               'full': 'The test channel is full.'}
-                    self.status.set(labels.get(state.get('status'), 'Waiting for game signal.') if state else 'No game signal. Join a server with the experimental mod installed.')
+                    self.status.set(state.get('radio_message') or labels.get(state.get('status'), 'Waiting for game signal.') if state else 'No game signal. Join a server with the experimental mod installed.')
                     self.metrics.set('Prepared: {} | Game sent: {} | Received: {} | Confirmed echo: {} | Skipped local/game: {}/{} | RTT: {} ms | Server rejected: {} | Room changes: {} | Owner: {}'.format(
                         sent, (state or {}).get('sent', '0'), received, (state or {}).get('confirmed', '0'), dropped, (state or {}).get('dropped', '0'),
                         (state or {}).get('rtt', '?'), (state or {}).get('rejected', '0'), (state or {}).get('room_changes', '0'), (state or {}).get('owner', '')))
@@ -231,7 +243,7 @@ class GameLabWindow:
                     self.status.set('Game audio stopped.' if value is None else 'Could not run game audio: ' + value)
                     self.start_button.configure(state='normal')
                     self.stop_button.configure(state='disabled')
-                    for widget in self.radios + [self.folder_entry, self.browse_button]:
+                    for widget in self.radios + [self.share_check, self.folder_entry, self.browse_button]:
                         widget.configure(state='normal')
                     self.refresh()
         except queue.Empty:

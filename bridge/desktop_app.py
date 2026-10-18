@@ -15,7 +15,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.6.2-dev"
+VERSION = "0.7.0-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -87,6 +87,7 @@ class ConnectorWindow:
         ttk.Button(controls, text="Setup guide", command=lambda: webbrowser.open(GUIDE_URL)).pack(side="right")
         ttk.Button(controls, text="Audio lab", command=self.open_audio_lab).pack(side="right", padx=8)
         ttk.Button(controls, text="Game lab", command=self.open_game_lab).pack(side="right")
+        ttk.Button(controls, text="MP radios", command=lambda: self.open_lab('--radio')).pack(side="right", padx=8)
         ttk.Label(body, text="Keep this window open while playing. Control music from your car radio.", wraplength=560).pack(anchor="w")
         self.settings = ttk.LabelFrame(body, text="Settings (defaults work for most players)", padding=10)
         self.settings.pack(fill="x", pady=(16, 10))
@@ -234,11 +235,11 @@ class ConnectorWindow:
 
 def main():
     root = tk.Tk()
-    if '--game-lab' in sys.argv or '--self-test-game' in sys.argv:
+    if '--game-lab' in sys.argv or '--radio' in sys.argv or '--self-test-game' in sys.argv:
         from game_lab import GameLabWindow
         if len(sys.argv) == 3 and sys.argv[1] == '--self-test-game':
             root.withdraw()
-            GameLabWindow(root)
+            GameLabWindow(root, radio=True)
             root.update()
             from game_audio import OpusEncoder, OpusDecoder
             from audio_stream import SILENCE
@@ -246,11 +247,12 @@ def main():
             encoder.encode(SILENCE)
             payload = encoder.encode(SILENCE)
             assert len(OpusDecoder().decode(payload)) == 2
+            from radio_audio import PearRadioControl
             Path(sys.argv[2]).write_text(json.dumps(dict(frozen=bool(getattr(sys, 'frozen', False)),
                                                          game_lab_created=True, opus_loaded=True)), encoding='utf-8')
             root.destroy()
             return
-        GameLabWindow(root, load_settings()['zomboid_dir'])
+        GameLabWindow(root, load_settings()['zomboid_dir'], radio='--radio' in sys.argv)
         root.mainloop()
         return
     if '--audio-lab' in sys.argv or '--self-test-audio' in sys.argv:

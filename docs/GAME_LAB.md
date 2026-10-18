@@ -1,6 +1,6 @@
 # Game network lab: test without a separate VPN
 
-This is an experimental test of audio over Project Zomboid's existing mod-command connection, targeting Build 42.21. It has not yet been verified in a live multiplayer session. The public v0.5.1 release does not include it.
+This is an experimental test of audio over Project Zomboid's existing mod-command connection, targeting Build 42.21. The user confirmed the 0.6.2-dev tone and Pear music between two players on October 18, 2026. Radio integration in 0.7.0-dev still needs live testing; see [Multiplayer radio test](RADIO_TEST.md). The public v0.5.1 release does not include it.
 
 No audio IP address, invitation, port forwarding or VPN is configured in Connector for this mode. Both players must already be able to join the same Zomboid server through the game's normal network setup. Listeners do not need Pear. The test server forwards encoded batches in Lua and needs no Pear, Connector or external audio service.
 
@@ -8,14 +8,14 @@ No audio IP address, invitation, port forwarding or VPN is configured in Connect
 
 The build produces two downloads for this experiment:
 
-- `AfterdarkFMConnector-Windows-0.6.2-dev.zip`: extract the entire ZIP on both computers. Run `AfterdarkFMConnector.exe`.
-- `MuldraughAfterdarkFM-Game-Test-0.6.2-dev.zip`: extract its `AfterdarkGameLab` folder into each client's user `Zomboid/mods` directory. Install that folder in the test server's user `Zomboid/mods` directory too if the server uses another machine/user folder.
+- `AfterdarkFMConnector-Windows-0.7.0-dev.zip`: extract the entire ZIP on both computers. Run `AfterdarkFMConnector.exe`.
+- `MuldraughAfterdarkFM-Game-Test-0.7.0-dev.zip`: extract its `AfterdarkGameLab` folder into each client's user `Zomboid/mods` directory. Install that folder in the test server's user `Zomboid/mods` directory too if the server uses another machine/user folder.
 
 The test mod has its own **local Mod ID `AfterdarkGameLab`**, named **Muldraugh Afterdark FM Game Lab [B42.21]**. This is not a second Workshop item. It avoids replacing the subscribed public `PearCarRadio` copy. Do not publish the test package as verified multiplayer support.
 
-Close the game before installing or updating. On the host, the developer helper `powershell -ExecutionPolicy Bypass -File .\Install-GameLab.ps1` installs the built test mod. Alternatively copy `dist/0.6.2-dev/Test-Mod/AfterdarkGameLab` into `Zomboid/mods` manually.
+Close the game before installing or updating. On the host, the developer helper `powershell -ExecutionPolicy Bypass -File .\Install-GameLab.ps1` installs the built test mod. Alternatively copy `dist/0.7.0-dev/Test-Mod/AfterdarkGameLab` into `Zomboid/mods` manually.
 
-Enable the Game Lab mod in the hosted test server's mod settings. On a dedicated server, add `AfterdarkGameLab` to its `Mods` setting and install the same local files; no new `WorkshopItems` entry is needed. Clients must have matching files. Restart the server and clients after changes. Use a fresh test world with the lab enabled. Do not enable a full local experimental `PearCarRadio` copy alongside the standalone lab: both contain these transport scripts. The subscribed public v0.5.1 mod can remain installed.
+Enable the Game Lab mod in the hosted test server's mod settings. On a dedicated server, add `AfterdarkGameLab` to its `Mods` setting and install the same local files; no new `WorkshopItems` entry is needed. Clients must have matching files. Restart the server and clients after changes. Use a test world with the lab enabled. Restart to load updated files. Do not enable a full local experimental `PearCarRadio` copy alongside the standalone lab: both contain these transport scripts. The subscribed public v0.5.1 mod can remain installed.
 
 ## First test: solo server round trip, no Pear required
 
@@ -25,7 +25,7 @@ The **Prepared**, **Game sent** and **Confirmed echo** counters should increase.
 
 Version 0.6.2-dev fixes a reproduced control-file race: reading a snapshot during its rewrite previously made Lua leave the room and reset its counters. Lua now retains the last complete heartbeat for at most two seconds from its original timestamp. An explicit Stop still leaves immediately. Counters remain cumulative for the same Connector run, including room reconnections; **Room changes** counts transitions to a different nonempty room after the first assignment. A new Connector run resets the counters. There is no 1,200-batch limit.
 
-For the next live check, restart the Connector, game and test server after updating both packages. Run the solo tone for at least four minutes. Record Prepared, Game sent, Confirmed echo, Skipped local/game and Room changes. During uninterrupted operation, the first three should advance together with small timing differences and Room changes should remain zero. The automated regression covers 1,305 batches with partial control reads; sustained behavior in the actual game and audio between two computers still require testing.
+For the next live check, restart the Connector, game and test server after updating both packages. Run the solo tone for at least four minutes. Record Prepared, Game sent, Confirmed echo, Skipped local/game and Room changes. During uninterrupted operation, the first three should advance together with small timing differences and Room changes should remain zero. The automated regression covers 1,305 batches with partial control reads; the user subsequently confirmed stable solo counters and audio between two computers. Broader latency and performance measurements remain pending.
 
 ## Second test: two computers, no Pear required
 

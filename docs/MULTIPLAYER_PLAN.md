@@ -1,14 +1,14 @@
 # Multiplayer plan
 
-Status: the standalone audio-streaming prototype is implemented on `feature/multiplayer-audio`; game multiplayer is not implemented. The published mod supports Project Zomboid Build 42.21 in singleplayer only. Multiplayer compatibility must be verified separately before it is advertised.
+Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.0-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
 
 ## Current progress
 
-The experimental Connector contains an [audio lab](AUDIO_LAB.md) with process-only Pear capture, a direct TLS sender, a listener that does not require Pear, invitation authentication, local output gain and bounded buffers. Automated local transport tests and a native synthetic two-process isolation test have passed. The packaged GUI and native imports have been smoke-tested. Actual Pear streaming between two computers, Internet connectivity, owner monitoring/gain behavior and game integration are still pending. The published singleplayer release remains separate from this prototype.
+On October 18, 2026, the user confirmed the 0.6.2-dev game-network test tone and actual Pear music between two players. Audio used the existing Zomboid connection, without a separate VPN. The solo echo counters also remained stable beyond 1,200 batches after fixing partial control-file reads. These observations establish the tested transport path, rather than complete multiplayer radio compatibility or dedicated-server support.
 
-The [game network investigation](GAME_NETWORK_RESEARCH.md) found a candidate path through the exposed mod-command APIs and the game's existing client/server connection. The next transport experiment should prioritize this route so players do not need a separate VPN, extra audio port or independently reachable Connector. Its latency and gameplay impact still need live multiplayer measurements; the current direct TLS lab does not establish these.
+Version 0.7.0-dev connects that transport to car radios and placed world radios. The server owns sessions, validates ownership/control requests, relays ordered Pear actions, chooses each player's nearby source and calculates listener gain. Use my Pear replaces ownership; source power/station changes, removal and Connector timeout release sessions. Automated checks cover authority, takeover, command ordering, real Opus through the Lua/file relay and radio UI wiring. Follow [Multiplayer radio test](RADIO_TEST.md) for live validation.
 
-The [game network lab](GAME_LAB.md) now implements that experiment: Opus/Base64 batches travel through client/server Lua commands and local ring files, with a standalone local test mod ID to avoid replacing the public Workshop copy. It includes a solo synthetic echo check and explicit source/listener modes. Real Opus encode/decode passes through the Lua/file harness; actual game networking and two-computer playback still need user validation. No vehicle session features are claimed yet.
+The owner currently monitors Pear directly, so owner-side volume/distance attenuation remains unresolved. Remote listeners use the Connector's distance-adjusted output. Held inventory radios and multiple-source mixing remain future work. The standalone [audio lab](AUDIO_LAB.md) and [game network lab](GAME_LAB.md) remain diagnostic tools. The public Workshop release is unchanged.
 
 ## Goal
 
@@ -62,7 +62,7 @@ World noise must be generated once by the server using vehicle power, radio volu
 
 ## Initial scope and limits
 
-- Vehicle radios first. Portable radios and radios placed in the world are future work.
+- Car radios and radios placed in the world are included in the experimental integration. Radios held in inventory remain future work.
 - One vehicle session per music owner initially.
 - A listener follows one source at a time initially to keep reception and source selection manageable. This is an initial scope choice, not a requirement imposed by Pear on listeners. Choosing between nearby sources remains a design decision; occupying a vehicle should take priority. Multiple simultaneous streams and mixing are future work.
 - Windows audio capture first; verify the minimum Windows version and package runtime dependencies so players do not need development tools.
@@ -92,4 +92,4 @@ World noise must be generated once by the server using vehicle power, radio volu
 - How to display owner authorization/capture failures, network failures and listener output problems.
 - Whether to require confirmation or a short cooldown for ownership replacement.
 
-The next validation is the solo server echo test in [Game network lab](GAME_LAB.md), followed by the test tone and actual Pear audio between two computers through the game connection. Keep Pear only on the transmitting computer. Integrate vehicle sessions and remote controls after transport and playback are verified. Radios in the world and broader polish follow later.
+The next validation is the two-player car and placed-radio checklist in [Multiplayer radio test](RADIO_TEST.md). Keep Pear only on supplying players. Resolve owner monitoring gain, then test dedicated-server behavior if it will be offered, before publishing multiplayer support.

@@ -1,5 +1,6 @@
 require "AfterdarkGameProtocol"
 if not isClient() then return end
+require "AfterdarkRadioClient"
 local P = AfterdarkGameProtocol
 local control, status = nil, {status="connecting", room="", owner=""}
 local lastPoll, lastHello, lastStatus = 0, 0, 0
@@ -15,11 +16,13 @@ local function leave()
     status = {status="connecting", room="", owner=""}
     txSequence, rxSequence, lastHello = -1, -1, 0
     probeSequence, lastServer = -1, 0
+    if AfterdarkRadioClient then AfterdarkRadioClient.clear() end
 end
 
 local function onServer(module, command, args)
     if module ~= P.module or type(args) ~= "table" or not control or args.client ~= control.client then return end
     local now = getTimestampMs()
+    if AfterdarkRadioClient and control.role == "radio" then AfterdarkRadioClient.onServer(command,args) end
     if command == "state" then
         local allowed = {waiting=true, sending=true, listening=true, busy=true, full=true}
         if not allowed[args.status] or type(args.room) ~= "string" or (args.room ~= "" and not P.room(args.room)) then return end
@@ -45,7 +48,7 @@ local function onServer(module, command, args)
         end
         return
     end
-    if command ~= "audio" or control.role ~= "listen" or status.status ~= "listening"
+    if command ~= "audio" or (control.role ~= "listen" and control.role ~= "radio") or status.status ~= "listening"
         or args.room ~= status.room or not P.integer(args.sequence,0,P.maxSequence)
         or args.sequence <= rxSequence or not P.payload(args.payload) then return end
     if rxSequence >= 0 then dropped = dropped + math.max(0, args.sequence - rxSequence - 1) end
@@ -68,7 +71,7 @@ local function tick()
         if control then leave() end
         return
     end
-    if not fresh or (incoming.role ~= "listen" and incoming.role ~= "share" and incoming.role ~= "tone") then
+    if not fresh or (incoming.role ~= "listen" and incoming.role ~= "share" and incoming.role ~= "tone" and incoming.role ~= "radio") then
         -- A writer can truncate the snapshot before its commit marker is visible.
         -- Reuse only the last validated heartbeat, without extending its deadline.
         incoming = control
@@ -83,9 +86,12 @@ local function tick()
         txCount, rxCount, dropped, errors, confirmed = 0, 0, 0, 0, 0
     end
     control = incoming
+    if AfterdarkRadioClient and control.role == "radio" then AfterdarkRadioClient.control=control end
     if now < lastHello or now - lastHello >= 1000 then
         lastHello = now
-        sendClientCommand(P.module, "hello", {client=control.client, role=control.role, echo=now})
+        local hello={client=control.client, role=control.role, echo=now}
+        if AfterdarkRadioClient and control.role=="radio" then AfterdarkRadioClient.hello(hello,control) end
+        sendClientCommand(P.module, "hello", hello)
     end
     if lastServer == 0 or now - lastServer > 3000 then status = {status="connecting", room="", owner=""} end
     if status.status == "sending" then
@@ -111,6 +117,7 @@ local function tick()
     if now < lastStatus or now - lastStatus >= 200 then
         lastStatus = now
         stateSerial = stateSerial + 1
+        if AfterdarkRadioClient and control.role=="radio" then AfterdarkRadioClient.writeState(stateSerial,status) end
         if not P.write("AfterdarkGame.status.txt", {serial=stateSerial, client=control.client,
             room=status.room, status=status.status, owner=status.owner, timestamp=now,
             sent=txCount, received=rxCount, dropped=dropped, errors=errors, rtt=rtt,

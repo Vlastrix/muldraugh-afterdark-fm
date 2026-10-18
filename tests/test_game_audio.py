@@ -35,6 +35,61 @@ function getOnlinePlayers()
 end
 '''
 
+RADIO_WORLD = '''
+function list(values)
+ return {size=function() return #values end,get=function(self,i) return values[i+1] end}
+end
+function data()
+ return {channel=94460,on=true,power=true,volume=1,
+  getChannel=function(self) return self.channel end,
+  getIsTurnedOn=function(self) return self.on end,
+  canBePoweredHere=function(self) return self.power end,
+  getDeviceVolume=function(self) return self.volume end,
+  getIsTelevision=function() return false end,
+  doReceiveSignal=function() end,getEmitter=function() return nil end,cleanSoundsAndEmitter=function() end}
+end
+car={id=7,x=20,y=20,z=0}
+square={}
+car.getId=function(self) return self.id end
+car.getX=function(self) return self.x end
+car.getY=function(self) return self.y end
+car.getZ=function(self) return self.z end
+car.getSquare=function() return square end
+part={kind='VehiclePart',data=data()}
+part.getDeviceData=function(self) return self.data end
+part.getVehicle=function() return car end
+part.getInventoryItem=function() return {} end
+part.getX=car.getX; part.getY=car.getY; part.getZ=car.getZ
+part.x=20;part.y=20;part.z=0
+car.getPartById=function(self,id) if id=='Radio' then return part end end
+world={kind='IsoWaveSignal',x=20,y=20,z=0,data=data()}
+world.getDeviceData=part.getDeviceData
+world.getX=car.getX;world.getY=car.getY;world.getZ=car.getZ
+world.getSquare=function() return square end
+world.getObjectIndex=function() return 0 end
+objects={world}
+square.getObjects=function() return list(objects) end
+function getCell() return {getGridSquare=function(self,x,y,z) if x==20 and y==20 and z==0 then return square end end} end
+function getVehicleById(id) if id==7 then return car end end
+function instanceof(object,kind) return object and object.kind==kind end
+names={}
+function getZomboidRadio() return {getChannelName=function(self,f) return names[f] end,
+ addChannelName=function(self,name,f) names[f]=name end} end
+players={}
+for id=0,2 do
+ local p={id=id,x=20,y=20,z=0,dead=false,vehicle=car}
+ p.getOnlineID=function(self) return self.id end
+ p.getUsername=function(self) return 'Player'..self.id end
+ p.getX=car.getX;p.getY=car.getY;p.getZ=car.getZ
+ p.getVehicle=function(self) return self.vehicle end
+ p.isDead=function(self) return self.dead end
+ players[id]=p
+end
+function player(id) return players[id] end
+noise={}
+function addSound(source,x,y,z,radius,volume) table.insert(noise,{x=x,y=y,radius=radius}) end
+'''
+
 
 class Realm:
     def __init__(self, network, player_id=None):
@@ -47,6 +102,8 @@ class Realm:
         globals_.server = player_id is None
         globals_.now = network.now
         self.lua.execute(HARNESS)
+        if network.radio:
+            self.lua.execute(RADIO_WORLD)
         globals_.getFileReader = self.reader
         globals_.getFileWriter = self.writer
 
@@ -54,11 +111,14 @@ class Realm:
             network.queue.append(('client', player_id, module, command, copy_table(args)))
 
         def server_send(player, module, command, args):
-            network.queue.append(('server', player.getOnlineID(), module, command, copy_table(args)))
+            network.queue.append(('server', player.getOnlineID(player), module, command, copy_table(args)))
 
         globals_.sendClientCommand = client_send
         globals_.sendServerCommand = server_send
         self.lua.execute((LUA / 'shared/AfterdarkGameProtocol.lua').read_text())
+        if network.radio:
+            self.lua.execute((LUA / 'shared/AfterdarkRadioDevices.lua').read_text())
+            self.lua.execute((LUA / ('server/AfterdarkRadioServer.lua' if player_id is None else 'client/AfterdarkRadioClient.lua')).read_text())
         self.lua.execute((LUA / ('server/AfterdarkGameServer.lua' if player_id is None else 'client/AfterdarkGameClient.lua')).read_text())
 
     def reader(self, name, create):
@@ -89,7 +149,8 @@ def copy_table(table):
 
 
 class Network:
-    def __init__(self):
+    def __init__(self, radio=False):
+        self.radio = radio
         self.now = int(time.time() * 1000)
         self.temporary = tempfile.TemporaryDirectory()
         self.queue = []

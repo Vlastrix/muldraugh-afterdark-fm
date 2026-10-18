@@ -130,7 +130,7 @@ class OpusDecoder:
 
 class GameBridge:
     def __init__(self, zomboid_dir, role, clock=time.time):
-        if role not in ('listen', 'share', 'tone'):
+        if role not in ('listen', 'share', 'tone', 'radio'):
             raise ValueError('Invalid game audio role.')
         self.folder = Path(zomboid_dir) / 'Lua'
         self.folder.mkdir(parents=True, exist_ok=True)
@@ -151,14 +151,17 @@ class GameBridge:
         self.last_control = -math.inf
         self.state = None
         self.state_deadline = -math.inf
+        self.report = {}
 
     def heartbeat(self):
         now = self.clock()
         if now - self.last_control >= 0.2:
             self.last_control = now
             self.serial += 1
-            write_snapshot(self.folder / (PREFIX + '.control.txt'), dict(
-                serial=self.serial, client=self.client, role=self.role, timestamp=int(now * 1000)))
+            fields = dict(serial=self.serial, client=self.client, role=self.role, timestamp=int(now * 1000))
+            if self.role == 'radio':
+                fields.update(self.report)
+            write_snapshot(self.folder / (PREFIX + '.control.txt'), fields)
         path = self.folder / (PREFIX + '.status.txt')
         state = read_snapshot(path, max_age=0.8, now=now)
         if state and state.get('client') == self.client:

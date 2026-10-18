@@ -1,5 +1,6 @@
 require "AfterdarkGameProtocol"
 if not isServer() then return end
+require "AfterdarkRadioServer"
 local P = AfterdarkGameProtocol
 local peers, owner, room = {}, nil, nil
 local generation, lastSweep = 0, 0
@@ -40,6 +41,7 @@ local function onCommand(module, command, player, args)
     local now = getTimestampMs()
     local id = player:getOnlineID()
     if not P.integer(id, 0, 32767) then return end
+    if AfterdarkRadioServer and AfterdarkRadioServer.onCommand(command,player,args) then return end
     local peer = peers[id]
     if command == "leave" then
         if peer and peer.client == args.client then removePeer(id); broadcastState() end
