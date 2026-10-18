@@ -27,7 +27,7 @@ def generate():
     draw.text((36, 34), "RADIO FOR THE END OF THE WORLD", font=font(15), fill=mint)
     draw.text((34, 74), "MULDRAUGH", font=font(49, True), fill=pale)
     draw.text((34, 128), "AFTERDARK", font=font(55, True), fill=pale)
-    draw.text((36, 193), "94.46 MHz  /  FM", font=font(31, True), fill=mint)
+    draw.text((36, 193), "94.6 MHz  /  FM", font=font(31, True), fill=mint)
     draw.rounded_rectangle((36, 259, 476, 426), radius=18, outline=mint, width=4, fill="#0c1d17")
     for radius in (48, 36, 24):
         draw.ellipse((112-radius, 342-radius, 112+radius, 342+radius), outline="#638970", width=2)

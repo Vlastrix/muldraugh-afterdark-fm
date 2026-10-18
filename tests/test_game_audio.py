@@ -40,7 +40,7 @@ function list(values)
  return {size=function() return #values end,get=function(self,i) return values[i+1] end}
 end
 function data()
- return {channel=94460,on=true,power=true,volume=1,
+ return {channel=94600,on=true,power=true,volume=1,
   getChannel=function(self) return self.channel end,
   getIsTurnedOn=function(self) return self.on end,
   canBePoweredHere=function(self) return self.power end,

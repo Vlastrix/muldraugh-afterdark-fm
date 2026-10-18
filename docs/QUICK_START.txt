@@ -1,5 +1,5 @@
 AFTERDARK FM CONNECTOR - FOR MULDRAUGH AFTERDARK FM
-94.46 MHz / Singleplayer
+94.6 MHz / Singleplayer
 Works with Project Zomboid Build 42.21 (singleplayer).
 
 You do NOT need Python, PowerShell or a command prompt to play.
@@ -19,7 +19,7 @@ Pear Desktop: https://github.com/pear-devs/pear-desktop
    Keep the window open while playing.
 5. Accept "PZPearCarRadio" in Pear when asked.
 6. Enter a car with a working radio and battery. Open its radio with V,
-   switch it on, select 94.46 MHz Afterdark FM and press Tune in.
+   switch it on, select 94.6 MHz Afterdark FM and press Tune in.
 7. Unpause the game. Use Previous, Pause, Resume and Next in the car radio.
 
 Music continues when you leave the car and fades as you walk away.

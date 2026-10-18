@@ -14,7 +14,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from generate_artwork import generate
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.7.4-dev"
+VERSION = "0.7.5-dev"
 NAME = "MuldraughAfterdarkFM"
 CONNECTOR_NAME = "AfterdarkFMConnector"
 BANNED = {".exe", ".dll", ".bat", ".cmd", ".app", ".dylib", ".sh", ".so", ".zip", ".ps1", ".py"}

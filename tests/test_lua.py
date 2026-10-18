@@ -327,29 +327,29 @@ class LuaTests(unittest.TestCase):
         ''')
         self.assertEqual(self.evaluate("window.readPresetCount"), 2)
         self.assertEqual(self.evaluate("presetsSent"), 1)
-        self.assertEqual(self.evaluate('stationNames[94460]'), "Muldraugh Afterdark FM")
-        self.assertEqual(self.evaluate('presets.entries:get(1):getFrequency()'), 94460)
+        self.assertEqual(self.evaluate('stationNames[94600]'), "Muldraugh Afterdark FM")
+        self.assertEqual(self.evaluate('presets.entries:get(1):getFrequency()'), 94600)
 
-    def test_dropdown_keeps_46_decimals_without_changing_other_stations(self):
+    def test_dropdown_formats_station_without_changing_other_stations(self):
         self.execute('''
             PearCarRadio.registerStation()
             labels={}
             local panel=setmetatable({comboBox={addOption=function(self, text)
                 table.insert(labels,text)
             end}}, {__index=RWMChannel})
-            panel:addComboOption(94460,PearCarRadio.stationName)
+            panel:addComboOption(94600,PearCarRadio.stationName)
             panel:addComboOption(101200,"KnoxTalk Radio")
         ''')
-        self.assertEqual(self.evaluate('labels[1]'), "94.46 MHz Afterdark FM")
+        self.assertEqual(self.evaluate('labels[1]'), "94.6 MHz Afterdark FM")
         self.assertEqual(self.evaluate('labels[2]'), "vanilla:KnoxTalk Radio")
 
-    def test_all_fallback_frequencies_keep_46_and_stay_within_fm_band(self):
+    def test_all_fallback_frequencies_keep_6_and_stay_within_fm_band(self):
         self.execute('''
             for i=1,20 do
                 PearCarRadio.frequency=nil
                 assert(PearCarRadio.registerStation())
                 local f=PearCarRadio.frequency
-                assert(f>=88000 and f<=108000 and f%1000==460)
+                assert(f>=88000 and f<=108000 and f%1000==600)
                 stationNames[f]="Occupied " .. tostring(i)
             end
             PearCarRadio.frequency=nil
@@ -358,14 +358,14 @@ class LuaTests(unittest.TestCase):
         self.assertTrue(self.evaluate('exhausted'))
 
     def test_frequency_collision_preserves_other_station(self):
-        self.execute('stationNames[94460]="Another mod FM"; PearCarRadio.ensurePreset(device)')
-        self.assertEqual(self.evaluate("PearCarRadio.frequency"), 95460)
-        self.assertEqual(self.evaluate("stationNames[94460]"), "Another mod FM")
+        self.execute('stationNames[94600]="Another mod FM"; PearCarRadio.ensurePreset(device)')
+        self.assertEqual(self.evaluate("PearCarRadio.frequency"), 95600)
+        self.assertEqual(self.evaluate("stationNames[94600]"), "Another mod FM")
 
     def test_full_presets_are_preserved_and_button_can_still_tune(self):
         self.execute('presets.max=1; PearCarRadio.tuneStation(device,"12")')
         self.assertEqual(self.evaluate("presets.entries:size()"), 1)
-        self.assertEqual(self.evaluate("channel"), 94460)
+        self.assertEqual(self.evaluate("channel"), 94600)
         self.execute('PearCarRadio.leaveStation(device,"12")')
         self.assertEqual(self.evaluate("channel"), 101200)
 

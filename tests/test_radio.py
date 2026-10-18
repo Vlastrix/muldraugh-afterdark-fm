@@ -386,7 +386,7 @@ class RadioUITests(unittest.TestCase):
         lua.execute('''
             sent={}
             function sendClientCommand(module,command,args) table.insert(sent,{command=command,args=args}) end
-            AfterdarkRadioDevices.station(94460)
+            AfterdarkRadioDevices.station(94600)
             AfterdarkRadioClient.control={client=string.rep('a',32),role='radio',timestamp=tostring(now),ready='1'}
             AfterdarkRadioClient.state={room='radio_one',key='car_12',owner='Owner',paused=false}
             window=setmetatable({width=330},{__index=ISRadioWindow})
@@ -411,7 +411,7 @@ class RadioUITests(unittest.TestCase):
         self.assertEqual(lua.eval('sent[3].args.action'),'pause')
         self.assertEqual(lua.eval('sent[4].args.action'),'release')
         self.assertEqual(lua.eval('queued[1].mode'),'SetChannel')
-        self.assertEqual(lua.eval('queued[1].frequency'),94460)
-        lua.execute('channel=94460; Events.OnTick.emit()')
-        self.assertEqual(lua.eval('window.afterdarkChannel'),94460)
+        self.assertEqual(lua.eval('queued[1].frequency'),94600)
+        lua.execute('channel=94600; Events.OnTick.emit()')
+        self.assertEqual(lua.eval('window.afterdarkChannel'),94600)
         self.assertEqual(lua.eval('window.readPresetCount'),2)

@@ -61,7 +61,7 @@ function RWMAfterdarkRadio:prerender()
     for _,button in ipairs({self.previous,self.next,self.pause}) do button:setEnable(connected and active and selected or false) end
     self.release:setEnable(connected and active and selected and R.state.owner==self.player:getUsername() or false)
     self.pause:setTitle(R.state.paused and "Resume" or "Pause")
-    local lines={connected and ("Afterdark FM - "..string.format("%.2f MHz",(D.frequency or 94460)/1000)) or "Open the Connector in Radio mode.",
+    local lines={connected and ("Afterdark FM - "..string.format("%.1f MHz",(D.frequency or 94600)/1000)) or "Open the Connector in Radio mode.",
         selected and ("Owner: "..(R.state.owner or "")) or "Tune in, then press Use my Pear.",
         selected and (R.state.title or "") or "Listeners do not need Pear.",
         R.state.message~="" and R.state.message or (selected and R.state.artist or "") or ""}
@@ -116,6 +116,6 @@ end
 local originalCombo=RWMChannel.addComboOption
 function RWMChannel:addComboOption(frequency,name)
     if frequency==D.frequency and name==D.name then
-        self.comboBox:addOption(string.format("%.2f MHz Afterdark FM",frequency/1000))
+        self.comboBox:addOption(string.format("%.1f MHz Afterdark FM",frequency/1000))
     else originalCombo(self,frequency,name) end
 end

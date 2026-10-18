@@ -1,13 +1,13 @@
 # Multiplayer radio integration test
 
-Experimental version: **0.7.4-dev**, targeting **Project Zomboid Build 42.21**. The 0.6.2-dev game-network test tone and Pear music were confirmed by the user between two players on October 18, 2026. The user subsequently confirmed radio audio and shared controls in 0.7.0-dev with both Connectors in Radio mode. Shared source volume and channel UI synchronization in 0.7.4-dev have automated coverage and still need live verification. The public Workshop release remains singleplayer only.
+Experimental version: **0.7.5-dev**, targeting **Project Zomboid Build 42.21**. The 0.6.2-dev game-network test tone and Pear music were confirmed by the user between two players on October 18, 2026. The user subsequently confirmed radio audio and shared controls in 0.7.0-dev with both Connectors in Radio mode. Shared source volume and channel UI synchronization in 0.7.5-dev have automated coverage and still need live verification. The public Workshop release remains singleplayer only.
 
 ## Install on both computers
 
 1. Close Zomboid and every running Connector/lab window.
-2. Extract `MuldraughAfterdarkFM-Game-Test-0.7.4-dev.zip`. Put its `AfterdarkGameLab` folder in `%USERPROFILE%\Zomboid\mods`, replacing the previous test copy. The host can use `Install-GameLab.ps1` after building.
+2. Extract `MuldraughAfterdarkFM-Game-Test-0.7.5-dev.zip`. Put its `AfterdarkGameLab` folder in `%USERPROFILE%\Zomboid\mods`, replacing the previous test copy. The host can use `Install-GameLab.ps1` after building.
 3. Enable **Muldraugh Afterdark FM Game Lab [B42.21]** in the server's Mods list. Install the same folder on a separate server machine if applicable. This local test has no Workshop ID. Keep the public singleplayer mod disabled on this test server.
-4. Extract the entire `AfterdarkFMConnector-Windows-0.7.4-dev.zip` on both computers. Start its EXE. The app starts disconnected. Open **Multiplayer radios (Steam)** and press **Start**.
+4. Extract the entire `AfterdarkFMConnector-Windows-0.7.5-dev.zip` on both computers. Start its EXE. The app starts disconnected. Open **Multiplayer radios (Steam)** and press **Start**.
 5. Listeners leave **Allow Use my Pear** unchecked. They do not need Pear, an API server, a music account, a separate VPN or an extra audio port.
 6. Anyone who wants to supply music opens Pear, enables its **API Server plugin** on `127.0.0.1:26538` with **Auth at first**, selects a song/playlist, checks **Allow Use my Pear**, selects the Pear process and presses Start. Authorize `PZPearCarRadio` in Pear if prompted. The process list can be refreshed before Start.
 
@@ -16,11 +16,11 @@ No persistent radio session/save data is introduced in this iteration. Restart t
 ## Car test
 
 1. Both players enter a powered car with an installed radio. Turn the radio on.
-2. Open its radio panel and expand **Muldraugh Afterdark FM**. Press **Tune to Afterdark FM** (normally **94.46 MHz**), then **Use my Pear** on the supplying player's panel. Wait for the owner/song to appear.
+2. Open its radio panel and expand **Muldraugh Afterdark FM**. Press **Tune to Afterdark FM** (normally **94.6 MHz**), then **Use my Pear** on the supplying player's panel. Wait for the owner/song to appear.
 3. The passenger should hear the owner's Pear audio through their Connector. Test **Previous**, **Pause/Resume** and **Next** from the passenger's panel. These commands control the owner's queue.
 4. The passenger exits and walks away: music should fade and stop beyond the audible radius. Returning should resume reception of current audio. The owner's session continues after leaving the car while its radio remains powered, tuned and loaded.
 5. If the passenger also enabled Pear sharing, re-enter and press **Use my Pear** to take over. The previous owner's controlled Pear should pause; subsequent buttons must affect the new owner. **Stop sharing** releases the current owner's session.
-6. Change the radio volume and verify both players hear the change, including zero. Confirm the native channel dropdown and Tune button agree on 94.46 MHz after tuning. Turn the radio off, switch to another station or remove its power. Reception and the owner's controlled playback should stop. Retune and explicitly take ownership to restart.
+6. Change the radio volume and verify both players hear the change, including zero. Confirm the native channel dropdown and Tune button agree on 94.6 MHz after tuning. Turn the radio off, switch to another station or remove its power. Reception and the owner's controlled playback should stop. Retune and explicitly take ownership to restart.
 7. Disconnect the owner's Connector or leave the server. The session should stop after the heartbeat timeout; another player must explicitly take ownership.
 
 Only occupants may control a vehicle radio. Nearby listeners cannot take over or issue playback commands.

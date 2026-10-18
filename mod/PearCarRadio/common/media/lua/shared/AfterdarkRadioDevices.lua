@@ -12,7 +12,7 @@ function D.station(frequency)
         radio:addChannelName(D.name, frequency, "Radio", false)
     elseif not D.frequency then
         for offset = 0, 19 do
-            local candidate = 88000 + ((6 + offset) % 20) * 1000 + 460
+            local candidate = 88000 + ((6 + offset) % 20) * 1000 + 600
             local name = radio:getChannelName(candidate)
             if not name or name == D.name then
                 D.frequency = candidate

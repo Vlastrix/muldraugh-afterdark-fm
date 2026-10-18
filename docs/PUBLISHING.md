@@ -1,6 +1,6 @@
 # Publishing the Windows Connector and Steam Workshop mod
 
-The `feature/multiplayer-audio` branch builds a local **0.7.4-dev** audio prototype under `dist/0.7.4-dev`. Do not publish it as game multiplayer support. The v0.5.1 instructions below describe the existing public singleplayer release; see [Multiplayer radio test](RADIO_TEST.md) for experimental testing.
+The `feature/multiplayer-audio` branch builds a local **0.7.5-dev** audio prototype under `dist/0.7.5-dev`. Do not publish it as game multiplayer support. The v0.5.1 instructions below describe the existing public singleplayer release; see [Multiplayer radio test](RADIO_TEST.md) for experimental testing.
 
 The packages are separate. The installed game's Workshop validator rejects executable file types, including `.exe` and `.dll`. Never put the connector inside `Contents`. Players download the connector from GitHub and subscribe to the game mod in Workshop.
 

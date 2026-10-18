@@ -15,7 +15,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.7.4-dev"
+VERSION = "0.7.5-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -73,7 +73,7 @@ class ConnectorWindow:
         body = ttk.Frame(root, padding=24)
         body.pack(fill="both", expand=True)
         ttk.Label(body, text=APP_NAME, style="Title.TLabel").pack(anchor="w")
-        ttk.Label(body, text="94.46 MHz  /  Windows Connector", style="Station.TLabel").pack(anchor="w", pady=(2, 18))
+        ttk.Label(body, text="94.6 MHz  /  Windows Connector", style="Station.TLabel").pack(anchor="w", pady=(2, 18))
         singleplayer = ttk.LabelFrame(body, text="Singleplayer", padding=12)
         singleplayer.pack(fill="x", pady=(0, 12))
         ttk.Label(singleplayer, textvariable=self.connection, style="Status.TLabel").pack(anchor="w")

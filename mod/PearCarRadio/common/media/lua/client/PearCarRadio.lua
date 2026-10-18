@@ -46,8 +46,8 @@ function Radio.registerStation()
     if Radio.frequency and radio:getChannelName(Radio.frequency) == Radio.stationName then return true end
     -- Stay in the normal FM band without replacing a vanilla/other mod station.
     for offset = 0, 19 do
-        -- Prefer 94.46 MHz; all collision fallbacks keep the favourite .46.
-        local frequency = 88000 + ((6 + offset) % 20) * 1000 + 460
+        -- Prefer 94.6 MHz; all collision fallbacks keep the favourite .6.
+        local frequency = 88000 + ((6 + offset) % 20) * 1000 + 600
         local name = radio:getChannelName(frequency)
         if not name or name == Radio.stationName then
             Radio.frequency = frequency
@@ -341,7 +341,7 @@ function RWMPearCarRadio:prerender()
     self.previousButton:setEnable(powered == true and not Radio.paused and getGameSpeed() > 0)
 
     local status = Radio.status
-    local hint = Radio.frequency and string.format("Afterdark FM - %.2f MHz", Radio.frequency / 1000)
+    local hint = Radio.frequency and string.format("Afterdark FM - %.1f MHz", Radio.frequency / 1000)
         or "No free FM frequency for Pear."
     if isClient() then hint = "This MVP supports singleplayer only."
     elseif selected and not powered then hint = "Turn on the car radio."
@@ -357,12 +357,11 @@ function RWMPearCarRadio:prerender()
     self:clearStencilRect()
 end
 
--- Vanilla's dropdown rounds every preset to one decimal (94.46 becomes 94.5).
--- Format only our station with two decimals; preserve other stations' display.
+-- Keep Afterdark FM's short name in the station dropdown.
 local originalAddComboOption = RWMChannel.addComboOption
 function RWMChannel:addComboOption(frequency, name)
     if Radio.frequency and frequency == Radio.frequency and name == Radio.stationName then
-        self.comboBox:addOption(string.format("%.2f MHz %s", frequency / 1000, Radio.shortName))
+        self.comboBox:addOption(string.format("%.1f MHz %s", frequency / 1000, Radio.shortName))
         return
     end
     originalAddComboOption(self, frequency, name)
