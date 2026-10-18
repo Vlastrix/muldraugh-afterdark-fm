@@ -8,6 +8,8 @@ The experimental Connector contains an [audio lab](AUDIO_LAB.md) with process-on
 
 The [game network investigation](GAME_NETWORK_RESEARCH.md) found a candidate path through the exposed mod-command APIs and the game's existing client/server connection. The next transport experiment should prioritize this route so players do not need a separate VPN, extra audio port or independently reachable Connector. Its latency and gameplay impact still need live multiplayer measurements; the current direct TLS lab does not establish these.
 
+The [game network lab](GAME_LAB.md) now implements that experiment: Opus/Base64 batches travel through client/server Lua commands and local ring files, with a standalone local test mod ID to avoid replacing the public Workshop copy. It includes a solo synthetic echo check and explicit source/listener modes. Real Opus encode/decode passes through the Lua/file harness; actual game networking and two-computer playback still need user validation. No vehicle session features are claimed yet.
+
 ## Goal
 
 Let the host and guests contribute music from their own Pear Desktop sessions, listen together through vehicle radios, and share playback controls. Keep development in the same repository and eventually update the existing Workshop item once both singleplayer and multiplayer have been tested.
@@ -90,4 +92,4 @@ World noise must be generated once by the server using vehicle power, radio volu
 - How to display owner authorization/capture failures, network failures and listener output problems.
 - Whether to require confirmation or a short cooldown for ownership replacement.
 
-The next transport prototype is the game-command probe described in [network research](GAME_NETWORK_RESEARCH.md), followed by compressed audio over that route. Also validate actual Pear capture/output in the audio lab on separate computers, with Pear installed only on the transmitting computer. Integrate vehicle sessions and remote controls after transport and playback are verified. Radios in the world and broader polish follow later.
+The next validation is the solo server echo test in [Game network lab](GAME_LAB.md), followed by the test tone and actual Pear audio between two computers through the game connection. Keep Pear only on the transmitting computer. Integrate vehicle sessions and remote controls after transport and playback are verified. Radios in the world and broader polish follow later.

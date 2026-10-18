@@ -9,6 +9,8 @@ PyInstaller hooks: https://github.com/pyinstaller/pyinstaller-hooks-contrib
 The experimental audio lab also bundles ProcTap (MIT), sounddevice/PortAudio,
 cryptography, psutil, NumPy, SciPy and CFFI. Their upstream license and notice
 files are included under licenses. Native process capture uses Windows WASAPI.
+The game network lab also bundles PyAV and its FFmpeg libraries for Opus audio
+encoding/decoding. PyAV's bundled license notices are included under licenses.
 
 The connector does not bundle Pear Desktop, Project Zomboid, YouTube media,
 music files or user credentials. These are independent products.

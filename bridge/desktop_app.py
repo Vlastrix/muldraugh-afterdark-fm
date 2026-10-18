@@ -15,7 +15,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.6.0-dev"
+VERSION = "0.6.1-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -86,6 +86,7 @@ class ConnectorWindow:
         self.stop_button.pack(side="left", padx=8)
         ttk.Button(controls, text="Setup guide", command=lambda: webbrowser.open(GUIDE_URL)).pack(side="right")
         ttk.Button(controls, text="Audio lab", command=self.open_audio_lab).pack(side="right", padx=8)
+        ttk.Button(controls, text="Game lab", command=self.open_game_lab).pack(side="right")
         ttk.Label(body, text="Keep this window open while playing. Control music from your car radio.", wraplength=560).pack(anchor="w")
         self.settings = ttk.LabelFrame(body, text="Settings (defaults work for most players)", padding=10)
         self.settings.pack(fill="x", pady=(16, 10))
@@ -112,6 +113,12 @@ class ConnectorWindow:
             self.directory.set(selected)
 
     def open_audio_lab(self):
+        self.open_lab('--audio-lab')
+
+    def open_game_lab(self):
+        self.open_lab('--game-lab')
+
+    def open_lab(self, mode):
         if self.worker and self.worker.is_alive():
             messagebox.showinfo(APP_NAME, 'Disconnect the singleplayer bridge before opening the audio lab. This prevents it from changing Pear volume during capture.')
             return
@@ -119,7 +126,7 @@ class ConnectorWindow:
         if not getattr(sys, 'frozen', False):
             arguments.append(str(Path(__file__).resolve()))
         environment = dict(os.environ, PYINSTALLER_RESET_ENVIRONMENT='1')
-        subprocess.Popen(arguments + ['--audio-lab'], env=environment,
+        subprocess.Popen(arguments + [mode], env=environment,
                          creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0)
 
     def start(self):
@@ -227,6 +234,25 @@ class ConnectorWindow:
 
 def main():
     root = tk.Tk()
+    if '--game-lab' in sys.argv or '--self-test-game' in sys.argv:
+        from game_lab import GameLabWindow
+        if len(sys.argv) == 3 and sys.argv[1] == '--self-test-game':
+            root.withdraw()
+            GameLabWindow(root)
+            root.update()
+            from game_audio import OpusEncoder, OpusDecoder
+            from audio_stream import SILENCE
+            encoder = OpusEncoder()
+            encoder.encode(SILENCE)
+            payload = encoder.encode(SILENCE)
+            assert len(OpusDecoder().decode(payload)) == 2
+            Path(sys.argv[2]).write_text(json.dumps(dict(frozen=bool(getattr(sys, 'frozen', False)),
+                                                         game_lab_created=True, opus_loaded=True)), encoding='utf-8')
+            root.destroy()
+            return
+        GameLabWindow(root, load_settings()['zomboid_dir'])
+        root.mainloop()
+        return
     if '--audio-lab' in sys.argv or '--self-test-audio' in sys.argv:
         from audio_lab import AudioLabWindow
         if len(sys.argv) == 3 and sys.argv[1] == '--self-test-audio':

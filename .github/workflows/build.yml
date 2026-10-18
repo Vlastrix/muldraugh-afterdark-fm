@@ -26,4 +26,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: afterdark-windows-and-workshop
-          path: dist/0.6.0-dev/
+          path: dist/0.6.1-dev/

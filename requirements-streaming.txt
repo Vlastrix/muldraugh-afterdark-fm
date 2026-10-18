@@ -6,3 +6,4 @@ psutil==7.2.2
 # Pin native numerical dependencies used by ProcTap and the output gain stage.
 numpy==2.5.4
 scipy==1.18.1
+av==19.0.1

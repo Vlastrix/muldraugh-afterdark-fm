@@ -14,7 +14,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from generate_artwork import generate
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.6.0-dev"
+VERSION = "0.6.1-dev"
 NAME = "MuldraughAfterdarkFM"
 CONNECTOR_NAME = "AfterdarkFMConnector"
 BANNED = {".exe", ".dll", ".bat", ".cmd", ".app", ".dylib", ".sh", ".so", ".zip", ".ps1", ".py"}
@@ -85,18 +85,26 @@ def main():
         if not audio_health.get('frozen') or not audio_health.get('native_capture_loaded'):
             raise ValueError('Packaged audio lab smoke test failed')
         print('Packaged audio lab smoke test:', audio_health)
+        game_report = staging / 'game-smoke-test.json'
+        subprocess.run([str(executable), '--self-test-game', str(game_report)],
+                       check=True, timeout=45, env=environment)
+        game_health = json.loads(game_report.read_text(encoding='utf-8'))
+        if not game_health.get('frozen') or not game_health.get('opus_loaded'):
+            raise ValueError('Packaged game lab smoke test failed')
+        print('Packaged game lab smoke test:', game_health)
         connector = staging / "player-download"
         connector.mkdir()
         shutil.copy2(executable, connector / executable.name)
         shutil.copy2(ROOT / "docs" / "QUICK_START.txt", connector / "QUICK_START.txt")
         shutil.copy2(ROOT / 'docs' / 'AUDIO_LAB.md', connector / 'AUDIO_LAB.md')
+        shutil.copy2(ROOT / 'docs' / 'GAME_LAB.md', connector / 'GAME_LAB.md')
         licenses = connector / "licenses"
         licenses.mkdir()
         shutil.copy2(Path(sys.base_prefix) / "LICENSE.txt", licenses / "Python-LICENSE.txt")
         tk_license = Path(sys.base_prefix) / "tcl" / "tk8.6" / "license.terms"
         if tk_license.exists():
             shutil.copy2(tk_license, licenses / "Tk-license.terms")
-        for package in ("pyinstaller", "pyinstaller-hooks-contrib", 'proc-tap', 'sounddevice', 'cryptography', 'psutil', 'numpy', 'scipy', 'cffi'):
+        for package in ("pyinstaller", "pyinstaller-hooks-contrib", 'proc-tap', 'sounddevice', 'cryptography', 'psutil', 'numpy', 'scipy', 'cffi', 'av'):
             distribution = importlib.metadata.distribution(package)
             for item in distribution.files or []:
                 if "license" in str(item).lower() or "copying" in str(item).lower():
@@ -111,6 +119,21 @@ def main():
         workshop = staging / "Workshop" / NAME
         mod_target = workshop / "Contents" / "mods" / "PearCarRadio"
         shutil.copytree(ROOT / "mod" / "PearCarRadio", mod_target)
+        # Standalone local lab ID avoids shadowing the subscribed public mod.
+        test_mod = staging / 'game-test-mod' / 'AfterdarkGameLab'
+        (test_mod / '42').mkdir(parents=True)
+        (test_mod / '42' / 'mod.info').write_text(
+            'name=Muldraugh Afterdark FM Game Lab [B42.21]\n'
+            'id=AfterdarkGameLab\nauthor=DonVladi\n'
+            'description=Experimental transport test for Project Zomboid Build 42.21. Multiplayer performance is not verified. No vehicle integration.\n'
+            'version=' + VERSION + '\nversionMin=42.21\nposter=poster.png\n', encoding='utf-8')
+        shutil.copy2(ROOT / 'assets' / 'workshop-preview.png', test_mod / '42' / 'poster.png')
+        for relative in ('shared/AfterdarkGameProtocol.lua', 'client/AfterdarkGameClient.lua', 'server/AfterdarkGameServer.lua'):
+            target = test_mod / 'common' / 'media' / 'lua' / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ROOT / 'mod' / 'PearCarRadio' / 'common' / 'media' / 'lua' / relative, target)
+        zip_folder(test_mod.parent, output / (NAME + '-Game-Test-' + VERSION + '.zip'))
+        shutil.copytree(test_mod, output / 'Test-Mod' / 'AfterdarkGameLab', dirs_exist_ok=True)
         shutil.copy2(ROOT / "assets" / "workshop-preview.png", workshop / "preview.png")
         shutil.copy2(ROOT / "workshop" / "workshop.txt", workshop / "workshop.txt")
         validate_workshop(workshop)
