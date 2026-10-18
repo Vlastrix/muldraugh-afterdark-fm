@@ -7,13 +7,14 @@ local txSequence, rxSequence, stateSerial = -1, -1, 0
 local txCount, rxCount, dropped, errors = 0, 0, 0, 0
 local confirmed, probeSequence = 0, -1
 local lastServer, rtt = 0, 0
+local statsClient, lastRoom, roomChanges = nil, nil, 0
 
 local function leave()
     if control then sendClientCommand(P.module, "leave", {client=control.client}) end
     control = nil
     status = {status="connecting", room="", owner=""}
     txSequence, rxSequence, lastHello = -1, -1, 0
-    txCount, rxCount, dropped, errors, confirmed, probeSequence = 0, 0, 0, 0, 0, -1
+    probeSequence, lastServer = -1, 0
 end
 
 local function onServer(module, command, args)
@@ -23,6 +24,10 @@ local function onServer(module, command, args)
         local allowed = {waiting=true, sending=true, listening=true, busy=true, full=true}
         if not allowed[args.status] or type(args.room) ~= "string" or (args.room ~= "" and not P.room(args.room)) then return end
         if args.room ~= status.room then txSequence, rxSequence, probeSequence = -1, -1, -1 end
+        if args.room ~= "" and args.room ~= lastRoom then
+            if lastRoom then roomChanges = roomChanges + 1 end
+            lastRoom = args.room
+        end
         status = {status=args.status, room=args.room, owner=type(args.owner)=="string" and args.owner:sub(1,80) or "",
             rejected=P.integer(args.rejected,0,P.maxSequence) and args.rejected or 0,
             listeners=P.integer(args.listeners,0,8) and args.listeners or 0}
@@ -57,13 +62,26 @@ local function tick()
     lastPoll = now
     local incoming = P.read("AfterdarkGame.control.txt")
     local timestamp = incoming and tonumber(incoming.timestamp) or 0
-    if not incoming or not P.token(incoming.client) or not P.integer(timestamp,0,9007199254740991)
-        or math.abs(now - timestamp) > 2000 or incoming.role == "stop" then
+    local fresh = incoming and P.token(incoming.client) and P.integer(timestamp,0,9007199254740991)
+        and math.abs(now - timestamp) <= 2000
+    if fresh and incoming.role == "stop" then
         if control then leave() end
         return
     end
-    if incoming.role ~= "listen" and incoming.role ~= "share" and incoming.role ~= "tone" then return end
+    if not fresh or (incoming.role ~= "listen" and incoming.role ~= "share" and incoming.role ~= "tone") then
+        -- A writer can truncate the snapshot before its commit marker is visible.
+        -- Reuse only the last validated heartbeat, without extending its deadline.
+        incoming = control
+        if not incoming or math.abs(now - tonumber(incoming.timestamp)) > 2000 then
+            if control then leave() end
+            return
+        end
+    end
     if control and (incoming.client ~= control.client or incoming.role ~= control.role) then leave() end
+    if statsClient ~= incoming.client then
+        statsClient, lastRoom, roomChanges = incoming.client, nil, 0
+        txCount, rxCount, dropped, errors, confirmed = 0, 0, 0, 0, 0
+    end
     control = incoming
     if now < lastHello or now - lastHello >= 1000 then
         lastHello = now
@@ -96,7 +114,8 @@ local function tick()
         if not P.write("AfterdarkGame.status.txt", {serial=stateSerial, client=control.client,
             room=status.room, status=status.status, owner=status.owner, timestamp=now,
             sent=txCount, received=rxCount, dropped=dropped, errors=errors, rtt=rtt,
-            rejected=status.rejected or 0, listeners=status.listeners or 0, confirmed=confirmed}) then errors = errors + 1 end
+            rejected=status.rejected or 0, listeners=status.listeners or 0, confirmed=confirmed,
+            room_changes=roomChanges}) then errors = errors + 1 end
     end
 end
 

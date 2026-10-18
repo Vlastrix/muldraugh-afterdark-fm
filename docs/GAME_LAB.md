@@ -8,12 +8,12 @@ No audio IP address, invitation, port forwarding or VPN is configured in Connect
 
 The build produces two downloads for this experiment:
 
-- `AfterdarkFMConnector-Windows-0.6.1-dev.zip`: extract the entire ZIP on both computers. Run `AfterdarkFMConnector.exe`.
-- `MuldraughAfterdarkFM-Game-Test-0.6.1-dev.zip`: extract its `AfterdarkGameLab` folder into each client's user `Zomboid/mods` directory. Install that folder in the test server's user `Zomboid/mods` directory too if the server uses another machine/user folder.
+- `AfterdarkFMConnector-Windows-0.6.2-dev.zip`: extract the entire ZIP on both computers. Run `AfterdarkFMConnector.exe`.
+- `MuldraughAfterdarkFM-Game-Test-0.6.2-dev.zip`: extract its `AfterdarkGameLab` folder into each client's user `Zomboid/mods` directory. Install that folder in the test server's user `Zomboid/mods` directory too if the server uses another machine/user folder.
 
 The test mod has its own **local Mod ID `AfterdarkGameLab`**, named **Muldraugh Afterdark FM Game Lab [B42.21]**. This is not a second Workshop item. It avoids replacing the subscribed public `PearCarRadio` copy. Do not publish the test package as verified multiplayer support.
 
-Close the game before installing or updating. On the host, the developer helper `powershell -ExecutionPolicy Bypass -File .\Install-GameLab.ps1` installs the built test mod. Alternatively copy `dist/0.6.1-dev/Test-Mod/AfterdarkGameLab` into `Zomboid/mods` manually.
+Close the game before installing or updating. On the host, the developer helper `powershell -ExecutionPolicy Bypass -File .\Install-GameLab.ps1` installs the built test mod. Alternatively copy `dist/0.6.2-dev/Test-Mod/AfterdarkGameLab` into `Zomboid/mods` manually.
 
 Enable the Game Lab mod in the hosted test server's mod settings. On a dedicated server, add `AfterdarkGameLab` to its `Mods` setting and install the same local files; no new `WorkshopItems` entry is needed. Clients must have matching files. Restart the server and clients after changes. Use a fresh test world with the lab enabled. Do not enable a full local experimental `PearCarRadio` copy alongside the standalone lab: both contain these transport scripts. The subscribed public v0.5.1 mod can remain installed.
 
@@ -22,6 +22,10 @@ Enable the Game Lab mod in the hosted test server's mod settings. On a dedicated
 You can begin without a friend. Install and enable the local test mod, host a fresh multiplayer test world, open the experimental Connector, disconnect the normal bridge and click **Game lab**. Select **Send test tone** and press **Start**.
 
 The **Prepared**, **Game sent** and **Confirmed echo** counters should increase. Prepared counts locally encoded batches; Game sent counts submissions by Lua to the game transport. The server returns each synthetic audio batch, and the client compares it with the original local snapshot. This checks the existing game connection in both directions without another player. The sender does not play the echoed tone locally, so this solo check is intentionally silent. A successful echo does not establish playback on another computer or acceptable Internet performance.
+
+Version 0.6.2-dev fixes a reproduced control-file race: reading a snapshot during its rewrite previously made Lua leave the room and reset its counters. Lua now retains the last complete heartbeat for at most two seconds from its original timestamp. An explicit Stop still leaves immediately. Counters remain cumulative for the same Connector run, including room reconnections; **Room changes** counts transitions to a different nonempty room after the first assignment. A new Connector run resets the counters. There is no 1,200-batch limit.
+
+For the next live check, restart the Connector, game and test server after updating both packages. Run the solo tone for at least four minutes. Record Prepared, Game sent, Confirmed echo, Skipped local/game and Room changes. During uninterrupted operation, the first three should advance together with small timing differences and Room changes should remain zero. The automated regression covers 1,305 batches with partial control reads; sustained behavior in the actual game and audio between two computers still require testing.
 
 ## Second test: two computers, no Pear required
 

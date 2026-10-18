@@ -179,6 +179,69 @@ class GameNetworkTests(unittest.TestCase):
         self.network.tick()
         self.assertEqual(self.network.delivered, [])
 
+    def write_control(self, role='tone'):
+        path = self.network.clients[0].folder / 'Lua/AfterdarkGame.control.txt'
+        write_snapshot(path, dict(serial=1, client=self.keys[0], role=role, timestamp=self.network.now))
+        return path
+
+    def test_partial_control_write_preserves_room_until_original_heartbeat_expires(self):
+        path = self.write_control()
+        self.network.tick()
+        room = self.session()
+        path.write_text('serial=2\n')
+        for _ in range(9):
+            self.network.tick(200)
+        self.assertFalse(any(command == 'leave' for _, _, command, _ in self.network.delivered))
+        self.write_control()
+        self.network.tick(200)
+        self.assertEqual(self.session(), room)
+        path.write_text('serial=3\n')
+        for _ in range(11):
+            self.network.tick(200)
+        leaves = [message for message in self.network.delivered if message[2] == 'leave']
+        self.assertEqual(len(leaves), 1)
+
+    def test_valid_stop_control_leaves_immediately(self):
+        self.write_control()
+        self.network.tick()
+        self.write_control('stop')
+        self.network.tick(40)
+        self.assertTrue(any(command == 'leave' for _, _, command, _ in self.network.delivered))
+
+    def test_over_twelve_hundred_batches_keep_counters_and_room_during_partial_reads(self):
+        path = self.write_control()
+        self.network.tick()
+        room = self.session()
+        folder = path.parent
+        for sequence in range(1305):
+            self.write_control()
+            if sequence % 41 == 0:
+                path.write_text('serial=unfinished\n')
+            packet = dict(serial=sequence, client=self.keys[0], room=room,
+                          timestamp=self.network.now, payload=self.payload)
+            write_snapshot(folder / f'AfterdarkGame.tx.{sequence % 16}.txt', packet)
+            write_snapshot(folder / 'AfterdarkGame.tx.txt', packet)
+            self.network.tick(40)
+        self.write_control()
+        self.network.tick(200)
+        state = read_snapshot(folder / 'AfterdarkGame.status.txt', now=self.network.now / 1000)
+        self.assertEqual(state['sent'], '1305')
+        self.assertEqual(state['confirmed'], '1305')
+        self.assertEqual(state['room_changes'], '0')
+        self.assertEqual(state['room'], room)
+        self.assertFalse(any(command == 'leave' for _, _, command, _ in self.network.delivered))
+        # A genuine room restart remains visible without erasing this run's totals.
+        self.write_control('stop')
+        self.network.tick(40)
+        self.write_control()
+        self.network.tick(600)
+        self.network.tick(200)
+        state = read_snapshot(folder / 'AfterdarkGame.status.txt', now=self.network.now / 1000)
+        self.assertEqual(state['sent'], '1305')
+        self.assertEqual(state['confirmed'], '1305')
+        self.assertEqual(state['room_changes'], '1')
+        self.assertNotEqual(state['room'], room)
+
     def test_server_relays_only_to_explicit_listeners_and_keeps_source_identity(self):
         self.hello(1, 'listen')
         self.hello(0, 'tone')

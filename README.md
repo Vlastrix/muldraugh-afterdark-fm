@@ -86,7 +86,7 @@ The experimental [Game network lab](docs/GAME_LAB.md) implements an Opus transpo
 
 Code, comments, UI strings, logs, documentation and commit messages use English.
 
-The experimental audio build requires Python 3.12 with `requirements-build.txt`; the singleplayer CLI still uses Python 3.9 or later. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the published singleplayer app when available. The experimental app builds separately under `dist/0.6.1-dev`.
+The experimental audio build requires Python 3.12 with `requirements-build.txt`; the singleplayer CLI still uses Python 3.9 or later. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the published singleplayer app when available. The experimental app builds separately under `dist/0.6.2-dev`.
 
 Build the Windows download and separate Workshop package with `powershell -ExecutionPolicy Bypass -File .\Build-Release.ps1`. This creates an isolated build environment and bundles Python and Tcl/Tk into the EXE using PyInstaller. A GitHub Actions workflow also builds on manual dispatch or version tags. See [publishing](docs/PUBLISHING.md) for the upload checklist. Built artifacts and local credentials are excluded from Git.
 

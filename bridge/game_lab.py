@@ -224,9 +224,9 @@ class GameLabWindow:
                               'listening': 'Receiving through the game connection.', 'busy': 'Another player is sharing. Stop and choose Listen.',
                               'full': 'The test channel is full.'}
                     self.status.set(labels.get(state.get('status'), 'Waiting for game signal.') if state else 'No game signal. Join a server with the experimental mod installed.')
-                    self.metrics.set('Prepared: {} | Game sent: {} | Received: {} | Confirmed echo: {} | Skipped local/game: {}/{} | RTT: {} ms | Server rejected: {} | Owner: {}'.format(
+                    self.metrics.set('Prepared: {} | Game sent: {} | Received: {} | Confirmed echo: {} | Skipped local/game: {}/{} | RTT: {} ms | Server rejected: {} | Room changes: {} | Owner: {}'.format(
                         sent, (state or {}).get('sent', '0'), received, (state or {}).get('confirmed', '0'), dropped, (state or {}).get('dropped', '0'),
-                        (state or {}).get('rtt', '?'), (state or {}).get('rejected', '0'), (state or {}).get('owner', '')))
+                        (state or {}).get('rtt', '?'), (state or {}).get('rejected', '0'), (state or {}).get('room_changes', '0'), (state or {}).get('owner', '')))
                 elif kind == 'finished':
                     self.status.set('Game audio stopped.' if value is None else 'Could not run game audio: ' + value)
                     self.start_button.configure(state='normal')
