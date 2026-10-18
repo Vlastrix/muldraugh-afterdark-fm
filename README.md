@@ -78,7 +78,7 @@ For a custom user directory or API port, use the connector's **Settings** before
 
 ## Development
 
-See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) for the proposed shared-radio behavior, Pear synchronization approach, implementation milestones and open decisions. Multiplayer is not implemented yet.
+See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) for the proposed shared-radio behavior, audio streaming between Connectors, implementation milestones and open decisions. In that planned design, only the music owner needs Pear; listeners use the mod and Connector. Multiplayer and audio streaming are not implemented yet.
 
 Code, comments, UI strings, logs, documentation and commit messages use English.
 
