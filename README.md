@@ -92,6 +92,7 @@ For a custom user directory or API port, use the connector's **Settings** before
 
 - **Validate the multiplayer beta:** test the latest volume and tuning fixes, longer sessions, reconnects, ownership changes and larger groups. Check dedicated servers separately before claiming support.
 - **Improve the supplier's listening experience:** apply distance attenuation locally without changing the music sent to other players or creating an echo.
+- **Explore directional audio:** position music in stereo according to the radio's location relative to the listener, so players can hear which direction it comes from. Investigate walls, doors and vehicle windows as a later refinement.
 - **Expand radio support:** verify placed world radios, then explore radios carried or held by players.
 - **Refine playback:** improve latency and recovery from interruptions, plus pause and Escape-menu behavior in singleplayer.
 - **Simplify setup:** make connection status, Pear authorization and troubleshooting clearer in the Connector.
