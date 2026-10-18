@@ -12,6 +12,9 @@ You need three parts: the **[Workshop mod](https://steamcommunity.com/sharedfile
 
 1. Open Pear Desktop / YouTube Music, select a song or playlist and verify playback.
 2. In Pear Desktop, open **Plugins** and enable the included **API Server** plugin. In that plugin's settings, use hostname `127.0.0.1`, port `26538`, and **Auth at first** authentication. No router port forwarding is required. API documentation is available at <http://127.0.0.1:26538/swagger> while enabled.
+
+   ![Pear Desktop Plugins menu with API Server [Beta] enabled and its Hostname, Port and Authorization strategy settings](assets/pear-api-server.png)
+
 3. Subscribe to the game mod in Workshop. Enable only one copy of the mod; remove local development copies before testing a Workshop download.
 4. Extract the Windows Connector ZIP and double-click **AfterdarkFMConnector.exe**. It connects automatically. Authorize **PZPearCarRadio** in Pear when prompted and keep the app open.
 5. Start Zomboid and enable **Muldraugh Afterdark FM**. For an existing save, use **Load → More → Choose mods**. A test save is recommended.
