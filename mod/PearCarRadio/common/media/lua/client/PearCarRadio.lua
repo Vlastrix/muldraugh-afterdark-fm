@@ -1,5 +1,6 @@
 require "RadioCom/ISRadioWindow"
 require "RadioCom/RadioWindowModules/RWMPanel"
+require "RadioCom/RadioWindowModules/RWMChannel"
 require "ISUI/ISButton"
 require "PZAPI/ModOptions"
 
@@ -15,12 +16,14 @@ Radio.action = "none"
 Radio.lastTick = 0
 Radio.lastNoise = 0
 Radio.session = tostring(getTimestampMs())
-Radio.stationName = "Pear FM"
+Radio.stationName = "Muldraugh Afterdark FM"
+Radio.shortName = "Afterdark FM"
 Radio.frequency = nil
 Radio.previousChannels = {}
 Radio.sourceVehicle = nil
 
-local options = PZAPI.ModOptions:create("PearCarRadio", "Pear Car Radio")
+-- Keep the existing mod ID, option keys and bridge files compatible with saves.
+local options = PZAPI.ModOptions:create("PearCarRadio", Radio.stationName)
 options:addDescription("Abre una cancion o playlist en Pear y ejecuta el puente local. Solo singleplayer.")
 local noiseOption = options:addTickBox("zombieNoise", "La musica atrae zombis", true,
     "Agrega ruido en el coche mientras Pear confirma reproduccion. El volumen de la radio controla el alcance.")
@@ -43,8 +46,9 @@ function Radio.registerStation()
     if not radio then return false end
     if Radio.frequency and radio:getChannelName(Radio.frequency) == Radio.stationName then return true end
     -- Stay in the normal FM band without replacing a vanilla/other mod station.
-    for offset = 0, 100 do
-        local frequency = 88000 + ((30 + offset) % 101) * 200
+    for offset = 0, 19 do
+        -- Prefer 94.46 MHz; all collision fallbacks keep the favourite .46.
+        local frequency = 88000 + ((6 + offset) % 20) * 1000 + 460
         local name = radio:getChannelName(frequency)
         if not name or name == Radio.stationName then
             Radio.frequency = frequency
@@ -68,12 +72,18 @@ function Radio.ensurePreset(device)
     local entries = presets:getPresets()
     for i = 0, entries:size() - 1 do
         local entry = entries:get(i)
-        if entry:getFrequency() == Radio.frequency then return true end
-        if entry:getName() == Radio.stationName then
+        if entry:getName() == Radio.stationName or entry:getName() == "Pear FM" then
+            local oldFrequency = entry:getFrequency()
+            local changed = oldFrequency ~= Radio.frequency or entry:getName() ~= Radio.stationName
             entry:setFrequency(Radio.frequency)
-            device:transmitPresets()
+            entry:setName(Radio.stationName)
+            if device:getChannel() == oldFrequency and oldFrequency ~= Radio.frequency then
+                device:setChannel(Radio.frequency)
+            end
+            if changed then device:transmitPresets() end
             return true
         end
+        if entry:getFrequency() == Radio.frequency then return true end
     end
     -- Do not remove an existing preset when a radio has all its slots filled.
     if entries:size() >= presets:getMaxPresets() then return false end
@@ -275,7 +285,7 @@ function RWMPearCarRadio:createChildren()
     local height = self.lineHeight + 8
     self:setHeight(height * 2 + self.lineHeight * 4 + 26)
     self.useButton = ISButton:new(10, 8, self.width - 20, height,
-        "Usar Pear en este coche", self, RWMPearCarRadio.onUse)
+        "Sintonizar Afterdark FM", self, RWMPearCarRadio.onUse)
     self.useButton:initialise()
     self:addChild(self.useButton)
     local width = (self.width - 28) / 3
@@ -335,7 +345,7 @@ function RWMPearCarRadio:prerender()
     -- UI keeps rendering while paused; OnTick alone does not cover that case.
     Radio.tick()
     local selected = self:isSelected()
-    self.useButton:setTitle(selected and "Volver a la emisora anterior" or "Sintonizar Pear FM")
+    self.useButton:setTitle(selected and "Volver a la emisora anterior" or "Sintonizar Afterdark FM")
     self.pauseButton:setTitle(Radio.paused and "Seguir" or "Pausa")
     local powered = selected and self.deviceData and self.deviceData:getIsTurnedOn()
     self.pauseButton:setEnable(powered == true)
@@ -343,7 +353,7 @@ function RWMPearCarRadio:prerender()
     self.previousButton:setEnable(powered == true and not Radio.paused and getGameSpeed() > 0)
 
     local status = Radio.status
-    local hint = Radio.frequency and string.format("Pear FM - %.1f MHz", Radio.frequency / 1000)
+    local hint = Radio.frequency and string.format("Afterdark FM - %.2f MHz", Radio.frequency / 1000)
         or "No hay frecuencia FM libre para Pear."
     if isClient() then hint = "MVP disponible solo en singleplayer."
     elseif selected and not powered then hint = "Enciende la radio del coche."
@@ -357,6 +367,17 @@ function RWMPearCarRadio:prerender()
         self:drawText(line, 10, self.textY + (i - 1) * self.lineHeight, 0.85, 0.95, 0.85, 1, UIFont.Small)
     end
     self:clearStencilRect()
+end
+
+-- Vanilla's dropdown rounds every preset to one decimal (94.46 becomes 94.5).
+-- Format only our station with two decimals; preserve other stations' display.
+local originalAddComboOption = RWMChannel.addComboOption
+function RWMChannel:addComboOption(frequency, name)
+    if Radio.frequency and frequency == Radio.frequency and name == Radio.stationName then
+        self.comboBox:addOption(string.format("%.2f MHz %s", frequency / 1000, Radio.shortName))
+        return
+    end
+    originalAddComboOption(self, frequency, name)
 end
 
 -- Add the real preset before vanilla builds its channel dropdown and info panel.
@@ -375,7 +396,7 @@ local originalCreateChildren = ISRadioWindow.createChildren
 function ISRadioWindow:createChildren()
     originalCreateChildren(self)
     if not isClient() and not isServer() then
-        self:addModule(RWMPearCarRadio:new(0, 0, self.width, 0), "Pear Car Radio", true)
+        self:addModule(RWMPearCarRadio:new(0, 0, self.width, 0), Radio.stationName, true)
     end
 end
 

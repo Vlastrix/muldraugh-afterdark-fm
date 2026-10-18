@@ -48,6 +48,7 @@ end
 function preset(name, freq)
     return {name=name, frequency=freq,
         getName=function(self) return self.name end,
+        setName=function(self, name) self.name=name end,
         getFrequency=function(self) return self.frequency end,
         setFrequency=function(self, f) self.frequency=f end}
 end
@@ -179,6 +180,9 @@ function Base:readFromObject(p, object, data, kind)
 end
 RWMPanel = Base
 ISButton = Base:derive("ISButton")
+RWMChannel = {
+    addComboOption=function(self, f, name) self.comboBox:addOption("vanilla:" .. name) end,
+}
 ISRadioWindow = {
     createChildren=function(self) self.vanillaCreated=true end,
     addModule=function(self, module, title, enabled) self.pearModule=module end,
@@ -320,18 +324,59 @@ class LuaTests(unittest.TestCase):
         ''')
         self.assertEqual(self.evaluate("window.readPresetCount"), 2)
         self.assertEqual(self.evaluate("presetsSent"), 1)
-        self.assertEqual(self.evaluate('stationNames[94000]'), "Pear FM")
-        self.assertEqual(self.evaluate('presets.entries:get(1):getFrequency()'), 94000)
+        self.assertEqual(self.evaluate('stationNames[94460]'), "Muldraugh Afterdark FM")
+        self.assertEqual(self.evaluate('presets.entries:get(1):getFrequency()'), 94460)
+
+    def test_legacy_preset_migrates_in_place_and_retunes_saved_radio(self):
+        self.execute('''
+            table.insert(presets.entries.items, preset("Pear FM", 94000))
+            presets.max=2
+            channel=94000
+            PearCarRadio.ensurePreset(device)
+            PearCarRadio.ensurePreset(device)
+        ''')
+        self.assertEqual(self.evaluate('presets.entries:size()'), 2)
+        self.assertEqual(self.evaluate('presets.entries:get(0):getName()'), "KnoxTalk Radio")
+        self.assertEqual(self.evaluate('presets.entries:get(1):getName()'), "Muldraugh Afterdark FM")
+        self.assertEqual(self.evaluate('channel'), 94460)
+        self.assertEqual(self.evaluate('presetsSent'), 1)
+
+    def test_dropdown_keeps_46_decimals_without_changing_other_stations(self):
+        self.execute('''
+            PearCarRadio.registerStation()
+            labels={}
+            local panel=setmetatable({comboBox={addOption=function(self, text)
+                table.insert(labels,text)
+            end}}, {__index=RWMChannel})
+            panel:addComboOption(94460,PearCarRadio.stationName)
+            panel:addComboOption(101200,"KnoxTalk Radio")
+        ''')
+        self.assertEqual(self.evaluate('labels[1]'), "94.46 MHz Afterdark FM")
+        self.assertEqual(self.evaluate('labels[2]'), "vanilla:KnoxTalk Radio")
+
+    def test_all_fallback_frequencies_keep_46_and_stay_within_fm_band(self):
+        self.execute('''
+            for i=1,20 do
+                PearCarRadio.frequency=nil
+                assert(PearCarRadio.registerStation())
+                local f=PearCarRadio.frequency
+                assert(f>=88000 and f<=108000 and f%1000==460)
+                stationNames[f]="Occupied " .. tostring(i)
+            end
+            PearCarRadio.frequency=nil
+            exhausted=not PearCarRadio.registerStation()
+        ''')
+        self.assertTrue(self.evaluate('exhausted'))
 
     def test_frequency_collision_preserves_other_station(self):
-        self.execute('stationNames[94000]="Another mod FM"; PearCarRadio.ensurePreset(device)')
-        self.assertEqual(self.evaluate("PearCarRadio.frequency"), 94200)
-        self.assertEqual(self.evaluate("stationNames[94000]"), "Another mod FM")
+        self.execute('stationNames[94460]="Another mod FM"; PearCarRadio.ensurePreset(device)')
+        self.assertEqual(self.evaluate("PearCarRadio.frequency"), 95460)
+        self.assertEqual(self.evaluate("stationNames[94460]"), "Another mod FM")
 
     def test_full_presets_are_preserved_and_button_can_still_tune(self):
         self.execute('presets.max=1; PearCarRadio.tuneStation(device,"12")')
         self.assertEqual(self.evaluate("presets.entries:size()"), 1)
-        self.assertEqual(self.evaluate("channel"), 94000)
+        self.assertEqual(self.evaluate("channel"), 94460)
         self.execute('PearCarRadio.leaveStation(device,"12")')
         self.assertEqual(self.evaluate("channel"), 101200)
 

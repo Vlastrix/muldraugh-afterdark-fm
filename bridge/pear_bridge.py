@@ -1,4 +1,4 @@
-"""Local SP companion for Pear Car Radio. Python 3.9+, standard library only."""
+"""Local SP companion for Muldraugh Afterdark FM. Python 3.9+, standard library only."""
 import argparse
 import json
 import logging

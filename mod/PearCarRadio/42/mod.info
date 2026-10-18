@@ -1,7 +1,7 @@
-name=Pear Car Radio (SP MVP)
+name=Muldraugh Afterdark FM
 id=PearCarRadio
 author=DonVladi
 description=Controla Pear Desktop desde la radio de tu coche. Requiere el puente local. Solo singleplayer.
-version=0.3.1
+version=0.4.0
 versionMin=42.20
 

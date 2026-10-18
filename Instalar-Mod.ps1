@@ -14,4 +14,4 @@ New-Item -ItemType Directory -Path $destination -Force | Out-Null
 Set-Content -LiteralPath $marker -Value 'PearCarRadio local development copy' -Encoding ASCII
 Copy-Item -Path (Join-Path $source '*') -Destination $destination -Recurse -Force
 Write-Host "Mod instalado en: $destination"
-Write-Host 'Reinicia Zomboid y activa Pear Car Radio (SP MVP) en los mods de la partida.'
+Write-Host 'Reinicia Zomboid y activa Muldraugh Afterdark FM en los mods de la partida.'
