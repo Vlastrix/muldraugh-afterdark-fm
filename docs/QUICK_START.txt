@@ -1,10 +1,10 @@
-MULDRAUGH AFTERDARK FM - WINDOWS COMPANION
+AFTERDARK FM CONNECTOR - FOR MULDRAUGH AFTERDARK FM
 94.46 MHz / Singleplayer
 Works with Project Zomboid Build 42.21 (singleplayer).
 
 You do NOT need Python, PowerShell or a command prompt to play.
 
-Required: the Workshop mod, Pear Desktop, and this Windows companion app.
+Required: the Workshop mod, Pear Desktop, and this Windows Connector app.
 Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3821956623
 Pear Desktop: https://github.com/pear-devs/pear-desktop
 
@@ -13,7 +13,7 @@ Pear Desktop: https://github.com/pear-devs/pear-desktop
 2. Open Pear Desktop and choose a song or playlist.
 3. In Pear, enable Plugins > API Server. Use 127.0.0.1 and port 26538,
    with "Auth at first" authentication.
-4. Extract the Windows companion ZIP and double-click MuldraughAfterdarkFM.exe.
+4. Extract the Windows Connector ZIP and double-click AfterdarkFMConnector.exe.
    Keep the window open while playing. It connects automatically.
 5. Accept "PZPearCarRadio" in Pear when asked.
 6. Enter a car with a working radio and battery. Open its radio with V,
@@ -22,7 +22,7 @@ Pear Desktop: https://github.com/pear-devs/pear-desktop
 
 Music continues when you leave the car and fades as you walk away.
 Switching stations stops controlled playback. The radio can attract zombies.
-Close the companion or click Disconnect when finished; it pauses the music
+Close the connector or click Disconnect when finished; it pauses the music
 it was controlling. Force-closing the process may prevent that final pause.
 
 If the app says Pear is offline, check Pear's API Server and authorization.
@@ -33,5 +33,5 @@ If stopped during authorization, close the prompt in Pear to finish disconnectin
 Support and instructions:
 https://github.com/Vlastrix/muldraugh-afterdark-fm
 
-Current limits: Windows companion, singleplayer, one tracked car.
+Current limits: Windows Connector, singleplayer, one tracked car.
 Song/playlist links inside the game and multiplayer are not supported yet.

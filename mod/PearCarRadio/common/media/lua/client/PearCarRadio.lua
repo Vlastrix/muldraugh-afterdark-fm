@@ -23,7 +23,7 @@ Radio.previousChannels = {}
 Radio.sourceVehicle = nil
 
 local options = PZAPI.ModOptions:create("PearCarRadio", Radio.stationName)
-options:addDescription("Open a song or playlist in Pear and keep the Afterdark companion open. Singleplayer only.")
+options:addDescription("Open a song or playlist in Pear and keep the Afterdark FM Connector open. Singleplayer only.")
 local noiseOption = options:addTickBox("zombieNoise", "Music attracts zombies", true,
     "Generate noise at the car while Pear confirms playback. The radio volume controls its range.")
 local muteOption = options:addTickBox("muteVanilla", "Mute the original radio audio while using Pear", true,
@@ -348,7 +348,7 @@ function RWMPearCarRadio:prerender()
     elseif selected and getGameSpeed() == 0 then hint = "Unpause the game to play music."
     elseif selected and Radio.paused then hint = "Paused from the car."
     end
-    local lines = {hint, Radio.fileError or status.message or "Open the Afterdark companion app.",
+    local lines = {hint, Radio.fileError or status.message or "Open the Afterdark FM Connector app.",
         status.title or "No song", status.artist or ""}
     self:setStencilRect(8, self.textY, self.width - 16, self.lineHeight * 4)
     for i, line in ipairs(lines) do

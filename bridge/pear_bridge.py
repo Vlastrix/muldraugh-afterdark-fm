@@ -1,4 +1,4 @@
-"""Local SP companion for Muldraugh Afterdark FM. Python 3.9+, standard library only."""
+"""Local SP connector for Muldraugh Afterdark FM. Python 3.9+, standard library only."""
 import argparse
 import json
 import logging
@@ -52,7 +52,7 @@ class PearError(Exception):
 
 
 class BridgeLock:
-    """An OS lock is released even if the companion crashes."""
+    """An OS lock is released even if the connector crashes."""
     def __init__(self, path):
         self.file = path.open("a+b")
         try:

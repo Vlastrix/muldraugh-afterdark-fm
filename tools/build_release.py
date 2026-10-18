@@ -14,8 +14,9 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from generate_artwork import generate
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.5.0"
+VERSION = "0.5.1"
 NAME = "MuldraughAfterdarkFM"
+CONNECTOR_NAME = "AfterdarkFMConnector"
 BANNED = {".exe", ".dll", ".bat", ".cmd", ".app", ".dylib", ".sh", ".so", ".zip", ".ps1", ".py"}
 
 
@@ -48,7 +49,7 @@ def main():
                         help="Use a separate folder when the previous build is running.")
     args = parser.parse_args()
     if sys.platform != "win32":
-        raise SystemExit("Build the Windows companion on Windows.")
+        raise SystemExit("Build the Windows Connector on Windows.")
     generate()
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -59,12 +60,12 @@ def main():
         staging = Path(temporary)
         subprocess.run([
             sys.executable, "-m", "PyInstaller", "--noconfirm", "--onefile", "--windowed", "--noupx",
-            "--name", NAME, "--icon", str(ROOT / "assets" / "app.ico"),
+            "--name", CONNECTOR_NAME, "--icon", str(ROOT / "assets" / "app.ico"),
             "--add-data", str(ROOT / "assets" / "app.ico") + ";assets",
             "--distpath", str(staging / "binaries"), "--workpath", str(staging / "build"),
             "--specpath", str(staging), str(ROOT / "bridge" / "desktop_app.py")
         ], cwd=str(ROOT), check=True)
-        executable = staging / "binaries" / (NAME + ".exe")
+        executable = staging / "binaries" / (CONNECTOR_NAME + ".exe")
         report = staging / "smoke-test.json"
         environment = os.environ.copy()
         environment["PATH"] = str(Path(os.environ["SystemRoot"]) / "System32")
@@ -75,11 +76,11 @@ def main():
         if not health.get("frozen") or not health.get("window_created"):
             raise ValueError("Packaged app smoke test failed")
         print("Packaged GUI smoke test:", health)
-        companion = staging / "player-download"
-        companion.mkdir()
-        shutil.copy2(executable, companion / executable.name)
-        shutil.copy2(ROOT / "docs" / "QUICK_START.txt", companion / "QUICK_START.txt")
-        licenses = companion / "licenses"
+        connector = staging / "player-download"
+        connector.mkdir()
+        shutil.copy2(executable, connector / executable.name)
+        shutil.copy2(ROOT / "docs" / "QUICK_START.txt", connector / "QUICK_START.txt")
+        licenses = connector / "licenses"
         licenses.mkdir()
         shutil.copy2(Path(sys.base_prefix) / "LICENSE.txt", licenses / "Python-LICENSE.txt")
         tk_license = Path(sys.base_prefix) / "tcl" / "tk8.6" / "license.terms"
@@ -92,8 +93,8 @@ def main():
                     source = distribution.locate_file(item)
                     if source.is_file():
                         shutil.copy2(source, licenses / (package + "-" + source.name))
-        shutil.copy2(ROOT / "docs" / "THIRD_PARTY_NOTICES.txt", companion / "THIRD_PARTY_NOTICES.txt")
-        zip_folder(companion, output / (NAME + "-Windows-" + VERSION + ".zip"))
+        shutil.copy2(ROOT / "docs" / "THIRD_PARTY_NOTICES.txt", connector / "THIRD_PARTY_NOTICES.txt")
+        zip_folder(connector, output / (CONNECTOR_NAME + "-Windows-" + VERSION + ".zip"))
         shutil.copy2(executable, output / executable.name)
 
         workshop = staging / "Workshop" / NAME

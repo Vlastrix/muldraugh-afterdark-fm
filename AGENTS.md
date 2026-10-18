@@ -2,6 +2,7 @@
 
 - Write source code, identifiers, comments, UI labels, logs, test fixtures, scripts, documentation and commit messages in English.
 - Respond to the user in their preferred conversation language.
+- Name the Windows app `Afterdark FM Connector` and its executable `AfterdarkFMConnector.exe` in UI, downloads and current documentation.
 - Include the exact supported Project Zomboid build in the mod title, including the Steam Workshop title, using a bracketed suffix such as `Muldraugh Afterdark FM [B42.21]`. Keep the build tag consistent with verified game support; do not advertise untested builds.
 - State the exact supported Project Zomboid build explicitly in the mod description and Steam Workshop description, for example `Works with Project Zomboid Build 42.21 (singleplayer).` Keep this statement consistent with the title and verified compatibility; do not imply support for other builds or multiplayer without testing.
 - Do not add backward-compatibility layers or save migrations during development. When a breaking change requires a fresh save, tell the user to create a new world with the mod. Keep the implementation focused on the current version.

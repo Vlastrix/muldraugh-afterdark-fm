@@ -1,4 +1,4 @@
-"""Windows companion UI. Players run the bundled executable, not Python."""
+"""Windows Connector UI. Players run the bundled executable, not Python."""
 import json
 import logging
 from logging.handlers import RotatingFileHandler
@@ -13,8 +13,8 @@ import webbrowser
 
 from pear_bridge import run_bridge
 
-APP_NAME = "Muldraugh Afterdark FM"
-VERSION = "0.5.0"
+APP_NAME = "Afterdark FM Connector"
+VERSION = "0.5.1"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -41,7 +41,7 @@ class WindowLogHandler(logging.Handler):
         self.events.put(("log", self.format(record)))
 
 
-class CompanionWindow:
+class ConnectorWindow:
     def __init__(self, root, auto_start=True, settings_path=SETTINGS_PATH):
         self.root = root
         self.settings_path = settings_path
@@ -55,7 +55,7 @@ class CompanionWindow:
         self.directory = tk.StringVar(value=settings["zomboid_dir"])
         self.port = tk.StringVar(value=str(settings["port"]))
         self.connection = tk.StringVar(value="Not connected")
-        self.message = tk.StringVar(value="Open Pear Desktop, then authorize this companion when prompted.")
+        self.message = tk.StringVar(value="Open Pear Desktop, then authorize this connector when prompted.")
         self.song = tk.StringVar(value="No song selected")
         self.artist = tk.StringVar(value="")
         self.root.title(APP_NAME)
@@ -72,7 +72,7 @@ class CompanionWindow:
         body = ttk.Frame(root, padding=24)
         body.pack(fill="both", expand=True)
         ttk.Label(body, text=APP_NAME, style="Title.TLabel").pack(anchor="w")
-        ttk.Label(body, text="94.46 MHz  /  Windows companion", style="Station.TLabel").pack(anchor="w", pady=(2, 18))
+        ttk.Label(body, text="94.46 MHz  /  Windows Connector", style="Station.TLabel").pack(anchor="w", pady=(2, 18))
         ttk.Label(body, textvariable=self.connection, style="Status.TLabel").pack(anchor="w")
         ttk.Label(body, textvariable=self.message, wraplength=565).pack(anchor="w", pady=(8, 14))
         ttk.Label(body, textvariable=self.song, font=("Segoe UI", 12, "bold"), wraplength=560).pack(anchor="w")
@@ -137,7 +137,7 @@ class CompanionWindow:
                 result = run_bridge(directory, port, self.stop_event,
                                     lambda status: self.events.put(("status", status)))
             except Exception:
-                logging.getLogger("pear-radio").exception("Companion stopped unexpectedly")
+                logging.getLogger("pear-radio").exception("Connector stopped unexpectedly")
             finally:
                 self.events.put(("stopped", result))
 
@@ -199,8 +199,8 @@ class CompanionWindow:
                     self.details.see("end")
                     self.details.configure(state="disabled")
                 elif kind == "stopped":
-                    self.connection.set("Disconnected" if value == 0 else "Could not start companion")
-                    self.message.set("Open Pear and press Connect." if value == 0 else "Check the details below. Another companion may already be running.")
+                    self.connection.set("Disconnected" if value == 0 else "Could not start connector")
+                    self.message.set("Open Pear and press Connect." if value == 0 else "Check the details below. Another connector may already be running.")
                     self.set_running(False)
                     self.remove_handlers()
         except queue.Empty:
@@ -217,14 +217,14 @@ def main():
     if len(sys.argv) == 3 and sys.argv[1] == "--self-test":
         # Packaged build smoke test. No user settings, network or game changes.
         root.withdraw()
-        CompanionWindow(root, auto_start=False)
+        ConnectorWindow(root, auto_start=False)
         root.update()
         report = {"frozen": bool(getattr(sys, "frozen", False)), "version": VERSION,
                   "tk": tk.TkVersion, "window_created": True}
         Path(sys.argv[2]).write_text(json.dumps(report), encoding="utf-8")
         root.destroy()
         return
-    CompanionWindow(root)
+    ConnectorWindow(root)
     root.mainloop()
 
 

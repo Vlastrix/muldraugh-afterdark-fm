@@ -1,4 +1,4 @@
-name: Build Windows companion and Workshop package
+name: Build Windows Connector and Workshop package
 
 on:
   workflow_dispatch:
@@ -26,4 +26,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: afterdark-windows-and-workshop
-          path: dist/0.5.0/
+          path: dist/0.5.1/
