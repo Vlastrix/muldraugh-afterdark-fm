@@ -1,6 +1,6 @@
 # Muldraugh Afterdark FM
 
-Play the **song or playlist already open in Pear Desktop** through **94.46 MHz Afterdark FM** on your Project Zomboid car radio. Audio plays in Pear; the mod does not download or retransmit music. Version **0.4.1**, experimental, singleplayer only. Requires Build 42.20 or later; developed against Build 42.21 and Pear 3.12.0.
+Play the **song or playlist already open in Pear Desktop** through **94.46 MHz Afterdark FM** on your Project Zomboid car radio. Audio plays in Pear; the mod does not download or retransmit music. Version **0.4.2**, experimental, singleplayer only. Requires Build 42.20 or later; developed against Build 42.21 and Pear 3.12.0.
 
 ## Setup
 
@@ -47,11 +47,9 @@ Original radio voices and static audio are muted on Afterdark FM. This is config
 
 ## Updating
 
-**0.4.1** uses English UI, logs, documentation and script names. Use **Start-Bridge.cmd** and **Install-Mod.ps1** instead of the previous Spanish filenames. Restart Zomboid to reload the mod, and restart the bridge to apply translated messages.
+Install the current version with **Install-Mod.ps1** and restart Zomboid. Restart **Start-Bridge.cmd** when the bridge changes too.
 
-The old **Pear FM** preset is renamed and moved in place when its radio is opened. A tuned legacy preset is retuned too. The mod ID `PearCarRadio`, saved option keys, authorization client ID `PZPearCarRadio`, and bridge filenames remain unchanged for compatibility.
-
-Versions before 0.1.1 used an unsupported `.control` extension. Current versions use `.txt` because Build 42.21 restricts Lua writes. The old `.status` file is unused. Version 0.3.1 removed the invalid `ChatElement.clear` call that caused repeated errors.
+During development, the project supports the current version without save migrations or backward-compatibility layers. Breaking changes may require a new world with the mod enabled; the update instructions will say when to create one. Old presets and saved data are not upgraded automatically.
 
 ## Troubleshooting
 

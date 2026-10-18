@@ -22,7 +22,6 @@ Radio.frequency = nil
 Radio.previousChannels = {}
 Radio.sourceVehicle = nil
 
--- Keep the existing mod ID, option keys and bridge files compatible with saves.
 local options = PZAPI.ModOptions:create("PearCarRadio", Radio.stationName)
 options:addDescription("Open a song or playlist in Pear and run the local bridge. Singleplayer only.")
 local noiseOption = options:addTickBox("zombieNoise", "Music attracts zombies", true,
@@ -72,17 +71,6 @@ function Radio.ensurePreset(device)
     local entries = presets:getPresets()
     for i = 0, entries:size() - 1 do
         local entry = entries:get(i)
-        if entry:getName() == Radio.stationName or entry:getName() == "Pear FM" then
-            local oldFrequency = entry:getFrequency()
-            local changed = oldFrequency ~= Radio.frequency or entry:getName() ~= Radio.stationName
-            entry:setFrequency(Radio.frequency)
-            entry:setName(Radio.stationName)
-            if device:getChannel() == oldFrequency and oldFrequency ~= Radio.frequency then
-                device:setChannel(Radio.frequency)
-            end
-            if changed then device:transmitPresets() end
-            return true
-        end
         if entry:getFrequency() == Radio.frequency then return true end
     end
     -- Do not remove an existing preset when a radio has all its slots filled.

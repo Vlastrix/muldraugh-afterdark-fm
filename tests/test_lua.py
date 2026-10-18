@@ -327,20 +327,6 @@ class LuaTests(unittest.TestCase):
         self.assertEqual(self.evaluate('stationNames[94460]'), "Muldraugh Afterdark FM")
         self.assertEqual(self.evaluate('presets.entries:get(1):getFrequency()'), 94460)
 
-    def test_legacy_preset_migrates_in_place_and_retunes_saved_radio(self):
-        self.execute('''
-            table.insert(presets.entries.items, preset("Pear FM", 94000))
-            presets.max=2
-            channel=94000
-            PearCarRadio.ensurePreset(device)
-            PearCarRadio.ensurePreset(device)
-        ''')
-        self.assertEqual(self.evaluate('presets.entries:size()'), 2)
-        self.assertEqual(self.evaluate('presets.entries:get(0):getName()'), "KnoxTalk Radio")
-        self.assertEqual(self.evaluate('presets.entries:get(1):getName()'), "Muldraugh Afterdark FM")
-        self.assertEqual(self.evaluate('channel'), 94460)
-        self.assertEqual(self.evaluate('presetsSent'), 1)
-
     def test_dropdown_keeps_46_decimals_without_changing_other_stations(self):
         self.execute('''
             PearCarRadio.registerStation()
