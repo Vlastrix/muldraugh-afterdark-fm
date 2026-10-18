@@ -1,5 +1,7 @@
 # Publishing the Windows Connector and Steam Workshop mod
 
+The `feature/multiplayer-audio` branch builds a local **0.6.0-dev** audio prototype under `dist/0.6.0-dev`. Do not publish it as game multiplayer support. The v0.5.1 instructions below describe the existing public singleplayer release; see [Audio lab](AUDIO_LAB.md) for experimental testing.
+
 The packages are separate. The installed game's Workshop validator rejects executable file types, including `.exe` and `.dll`. Never put the connector inside `Contents`. Players download the connector from GitHub and subscribe to the game mod in Workshop.
 
 The existing Workshop item is **3821956623**. Update this item rather than creating another one. Its title is **Muldraugh Afterdark FM [B42.21]** and its description explicitly states support for Build 42.21 in singleplayer.

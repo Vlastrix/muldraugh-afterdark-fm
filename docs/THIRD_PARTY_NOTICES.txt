@@ -6,5 +6,9 @@ Tcl/Tk: https://www.tcl.tk/software/tcltk/license.html
 PyInstaller and bootloader exception: https://pyinstaller.org/en/stable/license.html
 PyInstaller hooks: https://github.com/pyinstaller/pyinstaller-hooks-contrib
 
+The experimental audio lab also bundles ProcTap (MIT), sounddevice/PortAudio,
+cryptography, psutil, NumPy, SciPy and CFFI. Their upstream license and notice
+files are included under licenses. Native process capture uses Windows WASAPI.
+
 The connector does not bundle Pear Desktop, Project Zomboid, YouTube media,
 music files or user credentials. These are independent products.

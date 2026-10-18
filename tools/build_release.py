@@ -14,7 +14,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from generate_artwork import generate
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.5.1"
+VERSION = "0.6.0-dev"
 NAME = "MuldraughAfterdarkFM"
 CONNECTOR_NAME = "AfterdarkFMConnector"
 BANNED = {".exe", ".dll", ".bat", ".cmd", ".app", ".dylib", ".sh", ".so", ".zip", ".ps1", ".py"}
@@ -50,6 +50,8 @@ def main():
     args = parser.parse_args()
     if sys.platform != "win32":
         raise SystemExit("Build the Windows Connector on Windows.")
+    if sys.version_info < (3, 12):
+        raise SystemExit("The experimental streaming build requires Python 3.12 or later.")
     generate()
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -76,23 +78,32 @@ def main():
         if not health.get("frozen") or not health.get("window_created"):
             raise ValueError("Packaged app smoke test failed")
         print("Packaged GUI smoke test:", health)
+        audio_report = staging / 'audio-smoke-test.json'
+        subprocess.run([str(executable), '--self-test-audio', str(audio_report)],
+                       check=True, timeout=45, env=environment)
+        audio_health = json.loads(audio_report.read_text(encoding='utf-8'))
+        if not audio_health.get('frozen') or not audio_health.get('native_capture_loaded'):
+            raise ValueError('Packaged audio lab smoke test failed')
+        print('Packaged audio lab smoke test:', audio_health)
         connector = staging / "player-download"
         connector.mkdir()
         shutil.copy2(executable, connector / executable.name)
         shutil.copy2(ROOT / "docs" / "QUICK_START.txt", connector / "QUICK_START.txt")
+        shutil.copy2(ROOT / 'docs' / 'AUDIO_LAB.md', connector / 'AUDIO_LAB.md')
         licenses = connector / "licenses"
         licenses.mkdir()
         shutil.copy2(Path(sys.base_prefix) / "LICENSE.txt", licenses / "Python-LICENSE.txt")
         tk_license = Path(sys.base_prefix) / "tcl" / "tk8.6" / "license.terms"
         if tk_license.exists():
             shutil.copy2(tk_license, licenses / "Tk-license.terms")
-        for package in ("pyinstaller", "pyinstaller-hooks-contrib"):
+        for package in ("pyinstaller", "pyinstaller-hooks-contrib", 'proc-tap', 'sounddevice', 'cryptography', 'psutil', 'numpy', 'scipy', 'cffi'):
             distribution = importlib.metadata.distribution(package)
             for item in distribution.files or []:
                 if "license" in str(item).lower() or "copying" in str(item).lower():
                     source = distribution.locate_file(item)
                     if source.is_file():
-                        shutil.copy2(source, licenses / (package + "-" + source.name))
+                        identifier = hashlib.sha256(str(item).encode('utf-8')).hexdigest()[:8]
+                        shutil.copy2(source, licenses / (package + "-" + identifier + "-" + source.name))
         shutil.copy2(ROOT / "docs" / "THIRD_PARTY_NOTICES.txt", connector / "THIRD_PARTY_NOTICES.txt")
         zip_folder(connector, output / (CONNECTOR_NAME + "-Windows-" + VERSION + ".zip"))
         shutil.copy2(executable, output / executable.name)

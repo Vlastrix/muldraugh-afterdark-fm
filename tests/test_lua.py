@@ -6,12 +6,15 @@ from pathlib import Path
 import sys
 import unittest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".tools"))
 try:
     # Match the game's Lua 5.1 syntax rather than testing only a newer runtime.
     from lupa.lua51 import LuaRuntime
 except ImportError:
-    LuaRuntime = None
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".tools"))
+    try:
+        from lupa.lua51 import LuaRuntime
+    except ImportError:
+        LuaRuntime = None
 
 SOURCE = Path(__file__).resolve().parents[1] / "mod" / "PearCarRadio" / "common" / "media" / "lua" / "client" / "PearCarRadio.lua"
 

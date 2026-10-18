@@ -1,12 +1,16 @@
 # Multiplayer plan
 
-Status: proposed design, not implemented. The published mod supports Project Zomboid Build 42.21 in singleplayer only. Multiplayer compatibility must be verified separately before it is advertised.
+Status: the standalone audio-streaming prototype is implemented on `feature/multiplayer-audio`; game multiplayer is not implemented. The published mod supports Project Zomboid Build 42.21 in singleplayer only. Multiplayer compatibility must be verified separately before it is advertised.
+
+## Current progress
+
+The experimental Connector contains an [audio lab](AUDIO_LAB.md) with process-only Pear capture, a direct TLS sender, a listener that does not require Pear, invitation authentication, local output gain and bounded buffers. Automated local transport tests and a native synthetic two-process isolation test have passed. The packaged GUI and native imports have been smoke-tested. Actual Pear streaming between two computers, Internet connectivity, owner monitoring/gain behavior and game integration are still pending. The published singleplayer release remains separate from this prototype.
 
 ## Goal
 
 Let the host and guests contribute music from their own Pear Desktop sessions, listen together through vehicle radios, and share playback controls. Keep development in the same repository and eventually update the existing Workshop item once both singleplayer and multiplayer have been tested.
 
-The selected approach is to stream the music owner's actual Pear audio between Connectors. **Only players contributing music need Pear Desktop. Listeners need the mod and Afterdark FM Connector, without Pear or a YouTube account for reception.** This is a requirement for the planned implementation, not a feature of the current release.
+The selected approach is to stream the music owner's actual Pear audio between Connectors. **Only players contributing music need Pear Desktop. Listeners need the mod and Afterdark FM Connector, without Pear or a YouTube account for reception.** This is the target game experience, not a feature of the current published release. The standalone audio lab can test reception before game integration.
 
 Develop multiplayer on a separate Git branch. A second Workshop item is optional only if a distributed Steam beta becomes necessary; it is not required for the initial tests.
 
@@ -84,4 +88,4 @@ World noise must be generated once by the server using vehicle power, radio volu
 - How to display owner authorization/capture failures, network failures and listener output problems.
 - Whether to require confirmation or a short cooldown for ownership replacement.
 
-The next milestone is the two-Connector audio-streaming prototype, with Pear installed only on the transmitting computer. Integrate it with vehicle sessions and remote controls after that works. Radios in the world and broader polish follow later.
+The next validation is the two-Connector audio lab on separate computers, with Pear installed only on the transmitting computer. Integrate it with vehicle sessions and remote controls after that works. Radios in the world and broader polish follow later.

@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
-$buildPython = Join-Path $PSScriptRoot '.tools\build-env\Scripts\python.exe'
+$buildPython = Join-Path $PSScriptRoot '.tools\stream-build\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $buildPython)) {
-    python -m venv .tools\build-env
+    py -3.12 -m venv .tools\stream-build
     if ($LASTEXITCODE -ne 0) { throw 'Could not create the build environment.' }
 }
 & $buildPython -m pip install -r requirements-build.txt

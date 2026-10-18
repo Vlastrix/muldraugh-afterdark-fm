@@ -78,11 +78,11 @@ For a custom user directory or API port, use the connector's **Settings** before
 
 ## Development
 
-See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) for the proposed shared-radio behavior, audio streaming between Connectors, implementation milestones and open decisions. In that planned design, only the music owner needs Pear; listeners use the mod and Connector. Multiplayer and audio streaming are not implemented yet.
+See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) for shared-radio behavior, audio streaming between Connectors, milestones and open decisions. The `feature/multiplayer-audio` branch includes an experimental [audio lab](docs/AUDIO_LAB.md): only the sender needs Pear; listeners receive audio in Connector. Game multiplayer is not implemented, and the published v0.5.1 release remains singleplayer only.
 
 Code, comments, UI strings, logs, documentation and commit messages use English.
 
-Python 3.9 or later is needed for source development. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the built app when available.
+The experimental audio build requires Python 3.12 with `requirements-build.txt`; the singleplayer CLI still uses Python 3.9 or later. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the published singleplayer app when available. The experimental app builds separately under `dist/0.6.0-dev`.
 
 Build the Windows download and separate Workshop package with `powershell -ExecutionPolicy Bypass -File .\Build-Release.ps1`. This creates an isolated build environment and bundles Python and Tcl/Tk into the EXE using PyInstaller. A GitHub Actions workflow also builds on manual dispatch or version tags. See [publishing](docs/PUBLISHING.md) for the upload checklist. Built artifacts and local credentials are excluded from Git.
 

@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import queue
+import subprocess
 import sys
 import threading
 import tkinter as tk
@@ -14,7 +15,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.5.1"
+VERSION = "0.6.0-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -84,6 +85,7 @@ class ConnectorWindow:
         self.stop_button = ttk.Button(controls, text="Disconnect", command=self.stop, state="disabled")
         self.stop_button.pack(side="left", padx=8)
         ttk.Button(controls, text="Setup guide", command=lambda: webbrowser.open(GUIDE_URL)).pack(side="right")
+        ttk.Button(controls, text="Audio lab", command=self.open_audio_lab).pack(side="right", padx=8)
         ttk.Label(body, text="Keep this window open while playing. Control music from your car radio.", wraplength=560).pack(anchor="w")
         self.settings = ttk.LabelFrame(body, text="Settings (defaults work for most players)", padding=10)
         self.settings.pack(fill="x", pady=(16, 10))
@@ -108,6 +110,17 @@ class ConnectorWindow:
         selected = filedialog.askdirectory(title="Select your Zomboid user folder", initialdir=self.directory.get())
         if selected:
             self.directory.set(selected)
+
+    def open_audio_lab(self):
+        if self.worker and self.worker.is_alive():
+            messagebox.showinfo(APP_NAME, 'Disconnect the singleplayer bridge before opening the audio lab. This prevents it from changing Pear volume during capture.')
+            return
+        arguments = [sys.executable]
+        if not getattr(sys, 'frozen', False):
+            arguments.append(str(Path(__file__).resolve()))
+        environment = dict(os.environ, PYINSTALLER_RESET_ENVIRONMENT='1')
+        subprocess.Popen(arguments + ['--audio-lab'], env=environment,
+                         creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0)
 
     def start(self):
         if self.worker and self.worker.is_alive():
@@ -214,6 +227,26 @@ class ConnectorWindow:
 
 def main():
     root = tk.Tk()
+    if '--audio-lab' in sys.argv or '--self-test-audio' in sys.argv:
+        from audio_lab import AudioLabWindow
+        if len(sys.argv) == 3 and sys.argv[1] == '--self-test-audio':
+            root.withdraw()
+            AudioLabWindow(root)
+            root.update()
+            from proctap._native import ProcessLoopback
+            import sounddevice
+            import psutil
+            from audio_stream import create_identity
+            import tempfile
+            with tempfile.TemporaryDirectory() as folder:
+                create_identity(folder)
+            Path(sys.argv[2]).write_text(json.dumps(dict(frozen=bool(getattr(sys, 'frozen', False)),
+                                                         audio_lab_created=True, native_capture_loaded=True)), encoding='utf-8')
+            root.destroy()
+            return
+        AudioLabWindow(root)
+        root.mainloop()
+        return
     if len(sys.argv) == 3 and sys.argv[1] == "--self-test":
         # Packaged build smoke test. No user settings, network or game changes.
         root.withdraw()
