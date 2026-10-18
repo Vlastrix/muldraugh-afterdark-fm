@@ -72,7 +72,7 @@ class AudioLabWindow:
         self.stop_button = ttk.Button(controls, text='Stop', command=self.stop, state='disabled')
         self.stop_button.pack(side='left', padx=8)
         ttk.Button(controls, text='Copy invitation', command=self.copy_invite).pack(side='right')
-        ttk.Label(body, text='Listener volume (does not change the sender\'s Pear)').pack(anchor='w', pady=(14, 0))
+        ttk.Label(body, text='Personal listening volume (does not change the sender\'s Pear)').pack(anchor='w', pady=(14, 0))
         self.volume = ttk.Scale(body, from_=0, to=1, command=self.change_gain)
         self.volume.set(0.5)
         self.volume.pack(fill='x', pady=4)

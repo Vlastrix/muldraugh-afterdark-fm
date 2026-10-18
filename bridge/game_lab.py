@@ -68,7 +68,7 @@ class GameLabWindow:
         self.start_button.pack(side='left')
         self.stop_button = ttk.Button(controls, text='Stop', command=self.stop, state='disabled')
         self.stop_button.pack(side='left', padx=10)
-        ttk.Label(body, text='Listener volume').pack(anchor='w')
+        ttk.Label(body, text='Personal listening volume').pack(anchor='w')
         self.volume = ttk.Scale(body, from_=0, to=1, command=self.change_gain)
         self.volume.set(0.5)
         self.volume.pack(fill='x', pady=6)

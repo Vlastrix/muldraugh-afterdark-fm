@@ -1,13 +1,13 @@
 # Multiplayer radio integration test
 
-Experimental version: **0.7.5-dev**, targeting **Project Zomboid Build 42.21**. The 0.6.2-dev game-network test tone and Pear music were confirmed by the user between two players on October 18, 2026. The user subsequently confirmed radio audio and shared controls in 0.7.0-dev with both Connectors in Radio mode. Shared source volume and channel UI synchronization in 0.7.5-dev have automated coverage and still need live verification. The public Workshop release remains singleplayer only.
+Experimental version: **0.7.6-dev**, targeting **Project Zomboid Build 42.21**. The 0.6.2-dev game-network test tone and Pear music were confirmed by the user between two players on October 18, 2026. The user subsequently confirmed radio audio and shared controls in 0.7.0-dev with both Connectors in Radio mode. Shared source volume and channel UI synchronization in 0.7.6-dev have automated coverage and still need live verification. The public Workshop release remains singleplayer only.
 
 ## Install on both computers
 
 1. Close Zomboid and every running Connector/lab window.
-2. Extract `MuldraughAfterdarkFM-Game-Test-0.7.5-dev.zip`. Put its `AfterdarkGameLab` folder in `%USERPROFILE%\Zomboid\mods`, replacing the previous test copy. The host can use `Install-GameLab.ps1` after building.
+2. Extract `MuldraughAfterdarkFM-Game-Test-0.7.6-dev.zip`. Put its `AfterdarkGameLab` folder in `%USERPROFILE%\Zomboid\mods`, replacing the previous test copy. The host can use `Install-GameLab.ps1` after building.
 3. Enable **Muldraugh Afterdark FM Game Lab [B42.21]** in the server's Mods list. Install the same folder on a separate server machine if applicable. This local test has no Workshop ID. Keep the public singleplayer mod disabled on this test server.
-4. Extract the entire `AfterdarkFMConnector-Windows-0.7.5-dev.zip` on both computers. Start its EXE. The app starts disconnected. Open **Multiplayer radios (Steam)** and press **Start**.
+4. Extract the entire `AfterdarkFMConnector-Windows-0.7.6-dev.zip` on both computers. Start its EXE. The app starts disconnected. Open **Multiplayer radios (Steam)** and press **Start**.
 5. Listeners leave **Allow Use my Pear** unchecked. They do not need Pear, an API server, a music account, a separate VPN or an extra audio port.
 6. Anyone who wants to supply music opens Pear, enables its **API Server plugin** on `127.0.0.1:26538` with **Auth at first**, selects a song/playlist, checks **Allow Use my Pear**, selects the Pear process and presses Start. Authorize `PZPearCarRadio` in Pear if prompted. The process list can be refreshed before Start.
 
@@ -31,7 +31,7 @@ Use a radio placed in the world, including a dropped radio represented by an `Is
 
 ## Current limits and observations to record
 
-- **Owner monitoring remains direct Pear playback.** The owner does not receive a delayed duplicate stream. Radio volume is shared: the owner's Connector applies it to Pear before capture, so both owner and listeners hear it. Listener output applies distance attenuation without applying radio volume a second time. The owner's own distance fade is still pending. The original Pear volume is restored when sharing ends. Change the game's radio volume rather than Pear's slider while sharing.
+- **Owner monitoring remains direct Pear playback.** The owner does not receive a delayed duplicate stream. **Personal listening volume** adjusts only received audio on that computer. The in-game radio volume remains the shared control for everyone. Radio volume is shared: the owner's Connector applies it to Pear before capture, so both owner and listeners hear it. Listener output applies distance attenuation without applying radio volume a second time. The owner's own distance fade is still pending. The original Pear volume is restored when sharing ends. Change the game's radio volume rather than Pear's slider while sharing.
 - One session per owner, up to four source sessions and nine participating Connectors per server. At most eight remote listeners receive a source. Each listener follows one source: their own source takes priority while transmitting; otherwise an occupied car takes priority, then the strongest nearby radio. Multiple simultaneous streams/mixing are not implemented.
 - Physical power and station state are checked on the server. Sources that unload or change object identity are released. Shared controls require the current session, server-validated position and an increasing request ID. Buttons have a short cooldown and an eight-command bounded queue.
 - Server-added zombie noise requires recent owner playback confirmation and recent accepted audio. It follows source volume, with roughly 35 tiles at full volume. Native radio/vehicle noise can also occur; verify behavior in the game, including static text suppression.

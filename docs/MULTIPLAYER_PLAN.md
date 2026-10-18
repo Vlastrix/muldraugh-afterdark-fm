@@ -1,6 +1,6 @@
 # Multiplayer plan
 
-Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.5-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
+Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.6-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
 
 ## Current progress
 
