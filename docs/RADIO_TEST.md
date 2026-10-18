@@ -1,13 +1,13 @@
 # Multiplayer radio integration test
 
-Experimental version: **0.7.6-dev**, targeting **Project Zomboid Build 42.21**. The 0.6.2-dev game-network test tone and Pear music were confirmed by the user between two players on October 18, 2026. The user subsequently confirmed radio audio and shared controls in 0.7.0-dev with both Connectors in Radio mode. Shared source volume and channel UI synchronization in 0.7.6-dev have automated coverage and still need live verification. The public Workshop release remains singleplayer only.
+Experimental version: **0.7.7-dev**, targeting **Project Zomboid Build 42.21**. The 0.6.2-dev game-network test tone and Pear music were confirmed by the user between two players on October 18, 2026. The user subsequently confirmed radio audio and shared controls in 0.7.0-dev with both Connectors in Radio mode. Shared source volume and channel UI synchronization in 0.7.7-dev have automated coverage and still need live verification. The public Workshop release remains singleplayer only.
 
 ## Install on both computers
 
 1. Close Zomboid and every running Connector/lab window.
-2. Extract `MuldraughAfterdarkFM-Game-Test-0.7.6-dev.zip`. Put its `AfterdarkGameLab` folder in `%USERPROFILE%\Zomboid\mods`, replacing the previous test copy. The host can use `Install-GameLab.ps1` after building.
+2. Extract `MuldraughAfterdarkFM-Game-Test-0.7.7-dev.zip`. Put its `AfterdarkGameLab` folder in `%USERPROFILE%\Zomboid\mods`, replacing the previous test copy. The host can use `Install-GameLab.ps1` after building.
 3. Enable **Muldraugh Afterdark FM Game Lab [B42.21]** in the server's Mods list. Install the same folder on a separate server machine if applicable. This local test has no Workshop ID. Keep the public singleplayer mod disabled on this test server.
-4. Extract the entire `AfterdarkFMConnector-Windows-0.7.6-dev.zip` on both computers. Start its EXE. The app starts disconnected. Open **Multiplayer radios (Steam)** and press **Start**.
+4. Extract the entire `AfterdarkFMConnector-Windows-0.7.7-dev.zip` on both computers. Start its EXE. The app starts disconnected. In the main window's **Multiplayer radios (Steam)** panel, press **Start**. Singleplayer and Multiplayer cannot run simultaneously; stop the active mode before switching.
 5. Listeners leave **Allow Use my Pear** unchecked. They do not need Pear, an API server, a music account, a separate VPN or an extra audio port.
 6. Anyone who wants to supply music opens Pear, enables its **API Server plugin** on `127.0.0.1:26538` with **Auth at first**, selects a song/playlist, checks **Allow Use my Pear**, selects the Pear process and presses Start. Authorize `PZPearCarRadio` in Pear if prompted. The process list can be refreshed before Start.
 

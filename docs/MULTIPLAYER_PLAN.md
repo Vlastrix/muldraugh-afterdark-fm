@@ -1,6 +1,6 @@
 # Multiplayer plan
 
-Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.6-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
+Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.7-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
 
 ## Current progress
 
@@ -94,4 +94,4 @@ World noise must be generated once by the server using vehicle power, radio volu
 
 The next validation is the two-player car and placed-radio checklist in [Multiplayer radio test](RADIO_TEST.md). Keep Pear only on supplying players. Resolve owner monitoring gain, then test dedicated-server behavior if it will be offered, before publishing multiplayer support.
 
-The Connector starts disconnected, with Singleplayer controls and a single Multiplayer radios (Steam) entry. Diagnostic transport tools are developer-only command-line modes and are not offered in the main menu.
+The Connector starts disconnected, with Singleplayer and Multiplayer radios (Steam) panels in the same window. Only one mode can run at a time; closing the app stops and waits for the active audio worker. Diagnostic transport tools are developer-only command-line modes and are not offered in the main menu.

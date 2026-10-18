@@ -5,7 +5,6 @@ from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import queue
-import subprocess
 import sys
 import threading
 import tkinter as tk
@@ -15,7 +14,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.7.6-dev"
+VERSION = "0.7.7-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -56,15 +55,15 @@ class ConnectorWindow:
         self.directory = tk.StringVar(value=settings["zomboid_dir"])
         self.port = tk.StringVar(value=str(settings["port"]))
         self.connection = tk.StringVar(value="Disconnected")
-        self.message = tk.StringVar(value="For singleplayer, open Pear and press Connect. For multiplayer, use Multiplayer radios below.")
+        self.message = tk.StringVar(value="Open Pear and press Connect to play in singleplayer.")
         self.song = tk.StringVar(value="No song selected")
         self.artist = tk.StringVar(value="")
         self.root.title(APP_NAME)
         icon = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1])) / "assets" / "app.ico"
         if icon.is_file() and sys.platform == "win32":
             self.root.iconbitmap(str(icon))
-        self.root.geometry("680x700")
-        self.root.minsize(640, 660)
+        self.root.geometry("1240x760")
+        self.root.minsize(1180, 700)
         style = ttk.Style(root)
         style.theme_use("clam")
         style.configure("Title.TLabel", font=("Segoe UI", 20, "bold"))
@@ -74,7 +73,14 @@ class ConnectorWindow:
         body.pack(fill="both", expand=True)
         ttk.Label(body, text=APP_NAME, style="Title.TLabel").pack(anchor="w")
         ttk.Label(body, text="94.6 MHz  /  Windows Connector", style="Station.TLabel").pack(anchor="w", pady=(2, 18))
-        singleplayer = ttk.LabelFrame(body, text="Singleplayer", padding=12)
+        columns = ttk.Frame(body)
+        columns.pack(fill="both", expand=True)
+        columns.columnconfigure(0, weight=1, uniform="mode")
+        columns.columnconfigure(1, weight=1, uniform="mode")
+        columns.rowconfigure(0, weight=1)
+        solo = ttk.Frame(columns)
+        solo.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
+        singleplayer = ttk.LabelFrame(solo, text="Singleplayer", padding=12)
         singleplayer.pack(fill="x", pady=(0, 12))
         ttk.Label(singleplayer, textvariable=self.connection, style="Status.TLabel").pack(anchor="w")
         ttk.Label(singleplayer, textvariable=self.message, wraplength=565).pack(anchor="w", pady=(8, 14))
@@ -87,13 +93,13 @@ class ConnectorWindow:
         self.stop_button = ttk.Button(controls, text="Disconnect", command=self.stop, state="disabled")
         self.stop_button.pack(side="left", padx=8)
         ttk.Button(controls, text="Setup guide", command=lambda: webbrowser.open(GUIDE_URL)).pack(side="right")
-        modes = ttk.LabelFrame(body, text="Multiplayer", padding=10)
-        modes.pack(fill="x", pady=(0, 12))
-        mode_buttons = ttk.Frame(modes)
-        mode_buttons.pack(fill="x")
-        ttk.Button(mode_buttons, text="Multiplayer radios (Steam)", command=lambda: self.open_lab('--radio')).pack(side="left")
-        ttk.Label(modes, text="Control in-game radios through Zomboid's server connection.", wraplength=565).pack(anchor="w", pady=(8, 0))
-        self.settings = ttk.LabelFrame(body, text="Singleplayer settings", padding=10)
+        modes = ttk.LabelFrame(columns, text="Multiplayer radios (Steam)")
+        modes.grid(row=0, column=1, sticky="nsew")
+        from game_lab import GameLabWindow
+        self.multiplayer = GameLabWindow(root, settings['zomboid_dir'], radio=True, parent=modes,
+                                        can_start=lambda: not self.closing and not self.singleplayer_running(),
+                                        on_running=self.multiplayer_running_changed)
+        self.settings = ttk.LabelFrame(solo, text="Singleplayer settings", padding=10)
         self.settings.pack(fill="x", pady=(0, 10))
         self.settings.columnconfigure(1, weight=1)
         ttk.Label(self.settings, text="Zomboid folder").grid(row=0, column=0, sticky="w", padx=(0, 8))
@@ -104,7 +110,7 @@ class ConnectorWindow:
         ttk.Label(self.settings, text="Pear API port").grid(row=1, column=0, sticky="w", pady=(8, 0))
         self.port_entry = ttk.Entry(self.settings, textvariable=self.port, width=8)
         self.port_entry.grid(row=1, column=1, sticky="w", pady=(8, 0))
-        self.details = tk.Text(body, height=5, font=("Consolas", 9), state="disabled", wrap="word")
+        self.details = tk.Text(solo, height=5, width=1, font=("Consolas", 9), state="disabled", wrap="word")
         self.details.pack(fill="both", expand=True)
         ttk.Label(body, text="v{} | Multiplayer radios are experimental".format(VERSION)).pack(anchor="e", pady=(8, 0))
         self.root.protocol("WM_DELETE_WINDOW", self.close)
@@ -115,18 +121,21 @@ class ConnectorWindow:
         if selected:
             self.directory.set(selected)
 
-    def open_lab(self, mode):
-        if self.worker and self.worker.is_alive():
-            messagebox.showinfo(APP_NAME, 'Disconnect Singleplayer before opening a multiplayer mode.')
-            return
-        arguments = [sys.executable]
-        if not getattr(sys, 'frozen', False):
-            arguments.append(str(Path(__file__).resolve()))
-        environment = dict(os.environ, PYINSTALLER_RESET_ENVIRONMENT='1')
-        subprocess.Popen(arguments + [mode], env=environment,
-                         creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0)
+    def singleplayer_running(self):
+        return bool(self.worker and self.worker.is_alive())
+
+    def multiplayer_running(self):
+        return bool(self.multiplayer.worker and self.multiplayer.worker.is_alive())
+
+    def multiplayer_running_changed(self, running):
+        self.start_button.configure(state="disabled" if running or self.closing or self.singleplayer_running() else "normal")
 
     def start(self):
+        if self.closing:
+            return
+        if self.multiplayer_running():
+            messagebox.showinfo(APP_NAME, 'Stop Multiplayer before connecting Singleplayer.')
+            return
         if self.worker and self.worker.is_alive():
             return
         try:
@@ -180,7 +189,8 @@ class ConnectorWindow:
         self.log_handler = self.file_handler = None
 
     def set_running(self, running):
-        self.start_button.configure(state="disabled" if running else "normal")
+        self.start_button.configure(state="disabled" if running or self.multiplayer_running() or self.closing else "normal")
+        self.multiplayer.start_button.configure(state="disabled" if running or self.multiplayer_running() or self.closing else "normal")
         self.stop_button.configure(state="normal" if running else "disabled")
         for widget in (self.directory_entry, self.browse_button, self.port_entry):
             widget.configure(state="disabled" if running else "normal")
@@ -193,11 +203,9 @@ class ConnectorWindow:
 
     def close(self):
         self.closing = True
-        if self.worker and self.worker.is_alive():
+        self.multiplayer.close()
+        if self.singleplayer_running():
             self.stop()
-        else:
-            self.remove_handlers()
-            self.root.destroy()
 
     def poll(self):
         try:
@@ -222,7 +230,7 @@ class ConnectorWindow:
                     self.remove_handlers()
         except queue.Empty:
             pass
-        if self.closing and (not self.worker or not self.worker.is_alive()):
+        if self.closing and not self.singleplayer_running() and not self.multiplayer_running():
             self.remove_handlers()
             self.root.destroy()
             return
@@ -277,10 +285,11 @@ def main():
         window = ConnectorWindow(root)
         root.after(350, root.quit)
         root.mainloop()
-        disconnected = window.worker is None and window.connection.get() == "Disconnected"
+        disconnected = window.worker is None and window.multiplayer.worker is None and window.connection.get() == "Disconnected"
         assert disconnected, "Connector must start disconnected"
         report = {"frozen": bool(getattr(sys, "frozen", False)), "version": VERSION,
-                  "tk": tk.TkVersion, "window_created": True, "disconnected": disconnected}
+                  "tk": tk.TkVersion, "window_created": True, "disconnected": disconnected,
+                  "embedded_multiplayer": window.multiplayer.embedded}
         Path(sys.argv[2]).write_text(json.dumps(report), encoding="utf-8")
         root.destroy()
         return

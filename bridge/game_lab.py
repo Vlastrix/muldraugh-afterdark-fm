@@ -12,8 +12,11 @@ from game_audio import GameBridge
 
 
 class GameLabWindow:
-    def __init__(self, root, zomboid_dir=None, radio=False):
+    def __init__(self, root, zomboid_dir=None, radio=False, parent=None, can_start=None, on_running=None):
         self.root = root
+        self.embedded = parent is not None
+        self.can_start = can_start or (lambda: True)
+        self.on_running = on_running or (lambda running: None)
         self.events = queue.Queue()
         self.worker = None
         self.stop_event = threading.Event()
@@ -28,16 +31,19 @@ class GameLabWindow:
         self.status = tk.StringVar(value='Join the same server with the experimental mod installed, then press Start.')
         self.metrics = tk.StringVar(value='Waiting for game signal.')
         title = 'Multiplayer radios (Steam)' if radio else 'Game network lab'
-        root.title('Afterdark FM Connector - ' + title)
-        root.geometry('820x600')
-        root.minsize(720, 520)
-        body = ttk.Frame(root, padding=22)
+        if not self.embedded:
+            root.title('Afterdark FM Connector - ' + title)
+            root.geometry('820x600')
+            root.minsize(720, 520)
+        body = ttk.Frame(parent if self.embedded else root, padding=10 if self.embedded else 22)
         body.pack(fill='both', expand=True)
-        ttk.Label(body, text=title, font=('Segoe UI', 21, 'bold')).pack(anchor='w')
-        ttk.Label(body, text='Experimental - audio through Zomboid, without an extra VPN or audio port', wraplength=730).pack(anchor='w', pady=(4, 12))
+        wrap = 525 if self.embedded else 730
+        if not self.embedded:
+            ttk.Label(body, text=title, font=('Segoe UI', 21, 'bold')).pack(anchor='w')
+        ttk.Label(body, text='Experimental - audio through Zomboid, without an extra VPN or audio port', wraplength=wrap).pack(anchor='w', pady=(4, 12))
         description = ('Listen to car and placed radios automatically. Only a music owner needs Pear.\nJoin the same Zomboid server, then press Start.' if radio else
                        'Radio mode follows car and placed radios automatically. Only a music owner needs Pear.\nListen, Send test tone and Share my Pear are separate shared-channel transport tests.')
-        ttk.Label(body, text=description, wraplength=730).pack(anchor='w')
+        ttk.Label(body, text=description, wraplength=wrap).pack(anchor='w')
         roles = ttk.Frame(body)
         roles.pack(fill='x', pady=14)
         self.radios = []
@@ -46,7 +52,7 @@ class GameLabWindow:
             button = ttk.Radiobutton(roles, text=label, variable=self.role, value=role, command=self.refresh)
             button.pack(side='left', padx=(0, 20))
             self.radios.append(button)
-        self.share_check = ttk.Checkbutton(body, text='Allow Use my Pear in Radio mode (requires Pear API authorization)',
+        self.share_check = ttk.Checkbutton(body, text='Allow Use my Pear (requires Pear API authorization)',
                                           variable=self.share_capable, command=self.refresh)
         self.share_check.pack(anchor='w', pady=(0, 10))
         settings = ttk.Frame(body)
@@ -72,10 +78,11 @@ class GameLabWindow:
         self.volume = ttk.Scale(body, from_=0, to=1, command=self.change_gain)
         self.volume.set(0.5)
         self.volume.pack(fill='x', pady=6)
-        ttk.Label(body, textvariable=self.status, wraplength=730).pack(anchor='w', pady=(10, 6))
-        ttk.Label(body, textvariable=self.metrics, wraplength=730).pack(anchor='w')
-        ttk.Label(body, text='Use the test mod on both clients AND the server. Keep the singleplayer bridge disconnected.\nIn Radio mode, tune a powered radio to Afterdark FM, then press Use my Pear.\nRadio volume is shared. The owner hears Pear directly; distance fade applies to remote listeners.', wraplength=730).pack(anchor='w', pady=14)
-        root.protocol('WM_DELETE_WINDOW', self.close)
+        ttk.Label(body, textvariable=self.status, wraplength=wrap).pack(anchor='w', pady=(10, 6))
+        ttk.Label(body, textvariable=self.metrics, wraplength=wrap).pack(anchor='w')
+        ttk.Label(body, text='Use the test mod on both clients AND the server.\nTune a powered radio to Afterdark FM, then press Use my Pear.\nRadio volume is shared. The owner hears Pear directly; distance fade applies to remote listeners.', wraplength=wrap).pack(anchor='w', pady=14)
+        if not self.embedded:
+            root.protocol('WM_DELETE_WINDOW', self.close)
         root.after(100, self.poll)
 
     def browse(self):
@@ -105,7 +112,12 @@ class GameLabWindow:
             self.output.gain = float(value)
 
     def start(self):
+        if self.closing:
+            return
         if self.worker and self.worker.is_alive():
+            return
+        if not self.can_start():
+            messagebox.showinfo('Afterdark FM Connector', 'Disconnect Singleplayer before starting Multiplayer.')
             return
         role, folder, process = self.role.get(), Path(self.folder.get()).expanduser(), None
         try:
@@ -219,6 +231,7 @@ class GameLabWindow:
 
         self.worker = threading.Thread(target=work, daemon=True, name='AfterdarkGameBridge')
         self.worker.start()
+        self.on_running(True)
 
     def stop(self):
         self.stop_event.set()
@@ -250,9 +263,11 @@ class GameLabWindow:
                     for widget in self.radios + [self.share_check, self.folder_entry, self.browse_button]:
                         widget.configure(state='normal')
                     self.refresh()
+                    self.on_running(False)
         except queue.Empty:
             pass
         if self.closing and (not self.worker or not self.worker.is_alive()):
-            self.root.destroy()
+            if not self.embedded:
+                self.root.destroy()
             return
         self.root.after(100, self.poll)
