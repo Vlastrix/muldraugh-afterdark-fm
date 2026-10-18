@@ -78,6 +78,8 @@ For a custom user directory or API port, use the connector's **Settings** before
 
 ## Development
 
+See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) for the proposed shared-radio behavior, Pear synchronization approach, implementation milestones and open decisions. Multiplayer is not implemented yet.
+
 Code, comments, UI strings, logs, documentation and commit messages use English.
 
 Python 3.9 or later is needed for source development. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the built app when available.
