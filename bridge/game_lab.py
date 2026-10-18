@@ -27,18 +27,22 @@ class GameLabWindow:
         self.process = tk.StringVar()
         self.status = tk.StringVar(value='Join the same server with the experimental mod installed, then press Start.')
         self.metrics = tk.StringVar(value='Waiting for game signal.')
-        root.title('Afterdark FM Connector - Game network lab')
+        title = 'Multiplayer radios (Steam)' if radio else 'Game network lab'
+        root.title('Afterdark FM Connector - ' + title)
         root.geometry('820x600')
         root.minsize(720, 520)
         body = ttk.Frame(root, padding=22)
         body.pack(fill='both', expand=True)
-        ttk.Label(body, text='Game network lab', font=('Segoe UI', 21, 'bold')).pack(anchor='w')
+        ttk.Label(body, text=title, font=('Segoe UI', 21, 'bold')).pack(anchor='w')
         ttk.Label(body, text='Experimental - audio through Zomboid, without an extra VPN or audio port', wraplength=730).pack(anchor='w', pady=(4, 12))
-        ttk.Label(body, text='Radio mode follows car and placed radios automatically. Only a music owner needs Pear.\nListen, Send test tone and Share my Pear are the separate shared-channel transport tests.', wraplength=730).pack(anchor='w')
+        description = ('Listen to car and placed radios automatically. Only a music owner needs Pear.\nJoin the same Zomboid server, then press Start.' if radio else
+                       'Radio mode follows car and placed radios automatically. Only a music owner needs Pear.\nListen, Send test tone and Share my Pear are separate shared-channel transport tests.')
+        ttk.Label(body, text=description, wraplength=730).pack(anchor='w')
         roles = ttk.Frame(body)
         roles.pack(fill='x', pady=14)
         self.radios = []
-        for label, role in [('Radio', 'radio'), ('Listen', 'listen'), ('Send test tone', 'tone'), ('Share my Pear', 'share')]:
+        choices = [] if radio else [('Radio', 'radio'), ('Listen', 'listen'), ('Send test tone', 'tone'), ('Share my Pear', 'share')]
+        for label, role in choices:
             button = ttk.Radiobutton(roles, text=label, variable=self.role, value=role, command=self.refresh)
             button.pack(side='left', padx=(0, 20))
             self.radios.append(button)

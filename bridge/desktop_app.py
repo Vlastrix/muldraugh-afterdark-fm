@@ -15,7 +15,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.7.2-dev"
+VERSION = "0.7.3-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -63,8 +63,8 @@ class ConnectorWindow:
         icon = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1])) / "assets" / "app.ico"
         if icon.is_file() and sys.platform == "win32":
             self.root.iconbitmap(str(icon))
-        self.root.geometry("680x660")
-        self.root.minsize(640, 620)
+        self.root.geometry("680x700")
+        self.root.minsize(640, 660)
         style = ttk.Style(root)
         style.theme_use("clam")
         style.configure("Title.TLabel", font=("Segoe UI", 20, "bold"))
@@ -87,11 +87,13 @@ class ConnectorWindow:
         self.stop_button = ttk.Button(controls, text="Disconnect", command=self.stop, state="disabled")
         self.stop_button.pack(side="left", padx=8)
         ttk.Button(controls, text="Setup guide", command=lambda: webbrowser.open(GUIDE_URL)).pack(side="right")
-        modes = ttk.LabelFrame(body, text="Multiplayer and test tools", padding=10)
+        modes = ttk.LabelFrame(body, text="Multiplayer", padding=10)
         modes.pack(fill="x", pady=(0, 12))
-        ttk.Button(modes, text="Multiplayer radios", command=lambda: self.open_lab('--radio')).pack(side="left")
-        ttk.Button(modes, text="Game network test", command=self.open_game_lab).pack(side="left", padx=8)
-        ttk.Button(modes, text="Audio test", command=self.open_audio_lab).pack(side="left")
+        mode_buttons = ttk.Frame(modes)
+        mode_buttons.pack(fill="x")
+        ttk.Button(mode_buttons, text="Multiplayer radios (Steam)", command=lambda: self.open_lab('--radio')).pack(side="left")
+        ttk.Button(mode_buttons, text="Multiplayer audio (LAN)", command=self.open_audio_lab).pack(side="left", padx=8)
+        ttk.Label(modes, text="Steam: control in-game radios through Zomboid's server connection.\nLAN: share audio directly using an invitation; no in-game radio controls.", wraplength=565).pack(anchor="w", pady=(8, 0))
         self.settings = ttk.LabelFrame(body, text="Singleplayer settings", padding=10)
         self.settings.pack(fill="x", pady=(0, 10))
         self.settings.columnconfigure(1, weight=1)
@@ -117,12 +119,9 @@ class ConnectorWindow:
     def open_audio_lab(self):
         self.open_lab('--audio-lab')
 
-    def open_game_lab(self):
-        self.open_lab('--game-lab')
-
     def open_lab(self, mode):
         if self.worker and self.worker.is_alive():
-            messagebox.showinfo(APP_NAME, 'Disconnect the singleplayer bridge before opening the audio lab. This prevents it from changing Pear volume during capture.')
+            messagebox.showinfo(APP_NAME, 'Disconnect Singleplayer before opening a multiplayer mode.')
             return
         arguments = [sys.executable]
         if not getattr(sys, 'frozen', False):
