@@ -88,6 +88,17 @@ During development, the project supports the current version without save migrat
 
 For a custom user directory or API port, use the connector's **Settings** before connecting. Connection details appear in its window; the rotating log is stored at `Zomboid/Lua/AfterdarkBridge.log`.
 
+## Future plans
+
+- **Validate the multiplayer beta:** test the latest volume and tuning fixes, longer sessions, reconnects, ownership changes and larger groups. Check dedicated servers separately before claiming support.
+- **Improve the supplier's listening experience:** apply distance attenuation locally without changing the music sent to other players or creating an echo.
+- **Expand radio support:** verify placed world radios, then explore radios carried or held by players.
+- **Refine playback:** improve latency and recovery from interruptions, plus pause and Escape-menu behavior in singleplayer.
+- **Simplify setup:** make connection status, Pear authorization and troubleshooting clearer in the Connector.
+- **Explore in-game music selection:** investigate entering song or playlist links, subject to Pear's available APIs.
+
+These are development goals, not release commitments. Features will be documented as supported after implementation and in-game testing. See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) for technical details.
+
 ## Development
 
 See the [multiplayer plan](docs/MULTIPLAYER_PLAN.md) and [multiplayer validation checklist](docs/RADIO_TEST.md). Two-player audio and shared controls have user validation; latest fixes, placed radios and dedicated servers need further testing. Developer-only transport tools remain available with `--audio-lab` and `--game-lab`.
@@ -101,7 +112,5 @@ Run `python -m unittest discover -s tests -v`. To enable the optional Lua 5.1 ha
 Tests cover file snapshots, HTTP requests, simulated Pear playback and Lua behavior against a game API harness. They do not replace actual game/Pear testing. The singleplayer bridge uses Python's standard library; experimental streaming bundles native audio and codec dependencies. The mod extends `ISRadioWindow` and exchanges files to keep network requests off the game thread.
 
 The protocol uses `Zomboid/Lua/PearCarRadio.control.txt` and `PearCarRadio.status.txt`. Snapshots include a session, counter and final write marker. Incomplete/stale commands are rejected. The bridge requires fresh state before taking control and does not repeat a button after losing its response. Very fast presses can collapse into one action. An OS lock prevents duplicate bridges for the same Zomboid directory.
-
-Next steps: live multiplayer radio validation, owner monitoring volume, held inventory radios, in-game links and refined Escape-menu behavior.
 
 The Connector starts disconnected. Use Connect in the Singleplayer panel for solo play, or Start in the **Multiplayer radios (Steam)** panel for in-game multiplayer radios. Both panels are in the same window and only one mode can run at a time. Developer transport tests remain available through the --game-lab command-line option.
