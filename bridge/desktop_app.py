@@ -15,7 +15,7 @@ import webbrowser
 from pear_bridge import run_bridge
 
 APP_NAME = "Afterdark FM Connector"
-VERSION = "0.7.1-dev"
+VERSION = "0.7.2-dev"
 GUIDE_URL = "https://github.com/Vlastrix/muldraugh-afterdark-fm#player-setup"
 SETTINGS_PATH = Path(os.environ.get("LOCALAPPDATA", str(Path.home()))) / "MuldraughAfterdarkFM" / "settings.json"
 
@@ -43,7 +43,7 @@ class WindowLogHandler(logging.Handler):
 
 
 class ConnectorWindow:
-    def __init__(self, root, auto_start=True, settings_path=SETTINGS_PATH):
+    def __init__(self, root, settings_path=SETTINGS_PATH):
         self.root = root
         self.settings_path = settings_path
         self.events = queue.Queue()
@@ -55,16 +55,16 @@ class ConnectorWindow:
         settings = load_settings(settings_path)
         self.directory = tk.StringVar(value=settings["zomboid_dir"])
         self.port = tk.StringVar(value=str(settings["port"]))
-        self.connection = tk.StringVar(value="Not connected")
-        self.message = tk.StringVar(value="Open Pear Desktop, then authorize this connector when prompted.")
+        self.connection = tk.StringVar(value="Disconnected")
+        self.message = tk.StringVar(value="For singleplayer, open Pear and press Connect. For multiplayer, use Multiplayer radios below.")
         self.song = tk.StringVar(value="No song selected")
         self.artist = tk.StringVar(value="")
         self.root.title(APP_NAME)
         icon = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1])) / "assets" / "app.ico"
         if icon.is_file() and sys.platform == "win32":
             self.root.iconbitmap(str(icon))
-        self.root.geometry("640x540")
-        self.root.minsize(590, 490)
+        self.root.geometry("680x660")
+        self.root.minsize(640, 620)
         style = ttk.Style(root)
         style.theme_use("clam")
         style.configure("Title.TLabel", font=("Segoe UI", 20, "bold"))
@@ -74,23 +74,26 @@ class ConnectorWindow:
         body.pack(fill="both", expand=True)
         ttk.Label(body, text=APP_NAME, style="Title.TLabel").pack(anchor="w")
         ttk.Label(body, text="94.46 MHz  /  Windows Connector", style="Station.TLabel").pack(anchor="w", pady=(2, 18))
-        ttk.Label(body, textvariable=self.connection, style="Status.TLabel").pack(anchor="w")
-        ttk.Label(body, textvariable=self.message, wraplength=565).pack(anchor="w", pady=(8, 14))
-        ttk.Label(body, textvariable=self.song, font=("Segoe UI", 12, "bold"), wraplength=560).pack(anchor="w")
-        ttk.Label(body, textvariable=self.artist, wraplength=560).pack(anchor="w", pady=(2, 14))
-        controls = ttk.Frame(body)
+        singleplayer = ttk.LabelFrame(body, text="Singleplayer", padding=12)
+        singleplayer.pack(fill="x", pady=(0, 12))
+        ttk.Label(singleplayer, textvariable=self.connection, style="Status.TLabel").pack(anchor="w")
+        ttk.Label(singleplayer, textvariable=self.message, wraplength=565).pack(anchor="w", pady=(8, 14))
+        ttk.Label(singleplayer, textvariable=self.song, font=("Segoe UI", 12, "bold"), wraplength=560).pack(anchor="w")
+        ttk.Label(singleplayer, textvariable=self.artist, wraplength=560).pack(anchor="w", pady=(2, 10))
+        controls = ttk.Frame(singleplayer)
         controls.pack(fill="x", pady=(0, 12))
         self.start_button = ttk.Button(controls, text="Connect", command=self.start)
         self.start_button.pack(side="left")
         self.stop_button = ttk.Button(controls, text="Disconnect", command=self.stop, state="disabled")
         self.stop_button.pack(side="left", padx=8)
         ttk.Button(controls, text="Setup guide", command=lambda: webbrowser.open(GUIDE_URL)).pack(side="right")
-        ttk.Button(controls, text="Audio lab", command=self.open_audio_lab).pack(side="right", padx=8)
-        ttk.Button(controls, text="Game lab", command=self.open_game_lab).pack(side="right")
-        ttk.Button(controls, text="MP radios", command=lambda: self.open_lab('--radio')).pack(side="right", padx=8)
-        ttk.Label(body, text="Keep this window open while playing. Control music from your car radio.", wraplength=560).pack(anchor="w")
-        self.settings = ttk.LabelFrame(body, text="Settings (defaults work for most players)", padding=10)
-        self.settings.pack(fill="x", pady=(16, 10))
+        modes = ttk.LabelFrame(body, text="Multiplayer and test tools", padding=10)
+        modes.pack(fill="x", pady=(0, 12))
+        ttk.Button(modes, text="Multiplayer radios", command=lambda: self.open_lab('--radio')).pack(side="left")
+        ttk.Button(modes, text="Game network test", command=self.open_game_lab).pack(side="left", padx=8)
+        ttk.Button(modes, text="Audio test", command=self.open_audio_lab).pack(side="left")
+        self.settings = ttk.LabelFrame(body, text="Singleplayer settings", padding=10)
+        self.settings.pack(fill="x", pady=(0, 10))
         self.settings.columnconfigure(1, weight=1)
         ttk.Label(self.settings, text="Zomboid folder").grid(row=0, column=0, sticky="w", padx=(0, 8))
         self.directory_entry = ttk.Entry(self.settings, textvariable=self.directory)
@@ -102,11 +105,9 @@ class ConnectorWindow:
         self.port_entry.grid(row=1, column=1, sticky="w", pady=(8, 0))
         self.details = tk.Text(body, height=5, font=("Consolas", 9), state="disabled", wrap="word")
         self.details.pack(fill="both", expand=True)
-        ttk.Label(body, text="v{}  ·  Singleplayer only".format(VERSION)).pack(anchor="e", pady=(8, 0))
+        ttk.Label(body, text="v{} | Multiplayer radios are experimental".format(VERSION)).pack(anchor="e", pady=(8, 0))
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.root.after(100, self.poll)
-        if auto_start:
-            self.root.after(200, self.start)
 
     def browse(self):
         selected = filedialog.askdirectory(title="Select your Zomboid user folder", initialdir=self.directory.get())
@@ -278,10 +279,13 @@ def main():
     if len(sys.argv) == 3 and sys.argv[1] == "--self-test":
         # Packaged build smoke test. No user settings, network or game changes.
         root.withdraw()
-        ConnectorWindow(root, auto_start=False)
-        root.update()
+        window = ConnectorWindow(root)
+        root.after(350, root.quit)
+        root.mainloop()
+        disconnected = window.worker is None and window.connection.get() == "Disconnected"
+        assert disconnected, "Connector must start disconnected"
         report = {"frozen": bool(getattr(sys, "frozen", False)), "version": VERSION,
-                  "tk": tk.TkVersion, "window_created": True}
+                  "tk": tk.TkVersion, "window_created": True, "disconnected": disconnected}
         Path(sys.argv[2]).write_text(json.dumps(report), encoding="utf-8")
         root.destroy()
         return

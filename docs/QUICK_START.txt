@@ -15,7 +15,8 @@ Pear Desktop: https://github.com/pear-devs/pear-desktop
    In that plugin's settings, use 127.0.0.1 and port 26538,
    with "Auth at first" authentication.
 4. Extract the Windows Connector ZIP and double-click AfterdarkFMConnector.exe.
-   Keep the window open while playing. It connects automatically.
+   The app starts disconnected. Press Connect in the Singleplayer section.
+   Keep the window open while playing.
 5. Accept "PZPearCarRadio" in Pear when asked.
 6. Enter a car with a working radio and battery. Open its radio with V,
    switch it on, select 94.46 MHz Afterdark FM and press Tune in.

@@ -1,6 +1,6 @@
 # Multiplayer plan
 
-Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.1-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
+Status: experimental multiplayer radio integration is implemented on `feature/multiplayer-audio` as **0.7.2-dev** and awaits live radio testing. The published mod supports Project Zomboid Build 42.21 in singleplayer only.
 
 ## Current progress
 
@@ -93,3 +93,5 @@ World noise must be generated once by the server using vehicle power, radio volu
 - Whether to require confirmation or a short cooldown for ownership replacement.
 
 The next validation is the two-player car and placed-radio checklist in [Multiplayer radio test](RADIO_TEST.md). Keep Pear only on supplying players. Resolve owner monitoring gain, then test dedicated-server behavior if it will be offered, before publishing multiplayer support.
+
+The 0.7.2-dev Connector starts disconnected. Its main window groups Connect/Disconnect and status under Singleplayer, with a separate Multiplayer radios entry and explicitly labeled test tools.

@@ -14,7 +14,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from generate_artwork import generate
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.7.1-dev"
+VERSION = "0.7.2-dev"
 NAME = "MuldraughAfterdarkFM"
 CONNECTOR_NAME = "AfterdarkFMConnector"
 BANNED = {".exe", ".dll", ".bat", ".cmd", ".app", ".dylib", ".sh", ".so", ".zip", ".ps1", ".py"}
@@ -75,7 +75,7 @@ def main():
         environment.pop("PYTHONPATH", None)
         subprocess.run([str(executable), "--self-test", str(report)], check=True, timeout=45, env=environment)
         health = json.loads(report.read_text(encoding="utf-8"))
-        if not health.get("frozen") or not health.get("window_created"):
+        if not health.get("frozen") or not health.get("window_created") or not health.get("disconnected"):
             raise ValueError("Packaged app smoke test failed")
         print("Packaged GUI smoke test:", health)
         audio_report = staging / 'audio-smoke-test.json'
