@@ -1,16 +1,18 @@
-# Muldraugh Afterdark FM
+# Muldraugh Afterdark FM [B42.21]
 
-Play the **song or playlist already open in Pear Desktop** through **94.46 MHz Afterdark FM** on your Project Zomboid car radio. Audio plays in Pear; the mod does not download or retransmit music. Version **0.5.0**, experimental, singleplayer only. Requires Build 42.20 or later; developed against Build 42.21 and Pear 3.12.0.
+**Works with Project Zomboid Build 42.21 (singleplayer).** Mod version **0.5.0**, experimental; tested by the author with Pear 3.12.0. Other game builds and multiplayer have not been verified.
+
+Play the **song or playlist already open in Pear Desktop** through **94.46 MHz Afterdark FM** on your car radio. Audio plays in Pear; the mod does not download or retransmit music.
 
 ## Player setup
 
 The Windows companion opens as a desktop app. **Players do not need to install Python or use a command prompt.** Pear Desktop and the companion must stay open while playing.
 
-The first Workshop publication and GitHub download are being prepared. Release files will be available under [GitHub Releases](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases). For local testing, the build produces `dist/0.5.0/MuldraughAfterdarkFM.exe`.
+You need three parts: the **[Workshop mod](https://steamcommunity.com/sharedfiles/filedetails/?id=3821956623)**, **[Pear Desktop](https://github.com/pear-devs/pear-desktop)**, and our **[Windows companion ZIP](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases/download/v0.5.0/MuldraughAfterdarkFM-Windows-0.5.0.zip)**. See the [v0.5.0 test release](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases/tag/v0.5.0) for release notes and checksums. Extract the entire Windows ZIP; GitHub's source-code archives are for developers.
 
 1. Open Pear Desktop / YouTube Music, select a song or playlist and verify playback.
 2. Enable Pear's **API Server** plugin. Use hostname `127.0.0.1`, port `26538`, and **Auth at first** authentication. No router port forwarding is required. API documentation is available at <http://127.0.0.1:26538/swagger> while enabled.
-3. Subscribe to the game mod in Workshop once published. For development testing, close Zomboid and use `Install-Mod.ps1` to install the local copy. Enable only one copy of the mod.
+3. Subscribe to the game mod in Workshop. Enable only one copy of the mod; remove local development copies before testing a Workshop download.
 4. Extract the Windows companion ZIP and double-click **MuldraughAfterdarkFM.exe**. It connects automatically. Authorize **PZPearCarRadio** in Pear when prompted and keep the app open.
 5. Start Zomboid and enable **Muldraugh Afterdark FM**. For an existing save, use **Load → More → Choose mods**. A test save is recommended.
 6. Enter a car with an installed radio and a charged battery. Open its radio from the vehicle menu (`V`) and switch it on. Select **94.46 MHz Afterdark FM** under **Channel**, then press **Tune in**. The panel also has a **Tune to Afterdark FM** shortcut.
@@ -61,7 +63,7 @@ During development, the project supports the current version without save migrat
 
 | Symptom | Check |
 | --- | --- |
-| Mod missing | Restart Zomboid, use Build 42.20+ and enable the mod for the save too |
+| Mod missing | Restart Zomboid, use the supported Build 42.21 and enable the mod for the save too |
 | Panel missing | Sit in a car with an installed radio, open its radio window and expand the mod panel |
 | Bridge offline | Open Pear, enable API Server, match host/port and authorize PZPearCarRadio |
 | Companion cannot connect because another bridge is running | Close the old companion or bridge console, then click Connect |

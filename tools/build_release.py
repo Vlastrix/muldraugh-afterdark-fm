@@ -1,4 +1,5 @@
 """Build Windows player downloads and a separate Steam Workshop upload folder."""
+import argparse
 import hashlib
 import importlib.metadata
 import json
@@ -42,10 +43,14 @@ def validate_workshop(folder):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "dist" / VERSION,
+                        help="Use a separate folder when the previous build is running.")
+    args = parser.parse_args()
     if sys.platform != "win32":
         raise SystemExit("Build the Windows companion on Windows.")
     generate()
-    output = ROOT / "dist" / VERSION
+    output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
     scratch = ROOT / ".tools"
     scratch.mkdir(exist_ok=True)

@@ -1,11 +1,14 @@
 MULDRAUGH AFTERDARK FM - WINDOWS COMPANION
 94.46 MHz / Singleplayer
+Works with Project Zomboid Build 42.21 (singleplayer).
 
 You do NOT need Python, PowerShell or a command prompt to play.
 
+Required: the Workshop mod, Pear Desktop, and this Windows companion app.
+Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=3821956623
+Pear Desktop: https://github.com/pear-devs/pear-desktop
+
 1. Subscribe to the mod in Steam Workshop and enable it in Project Zomboid.
-   Before the Workshop release, use the separate Workshop test package:
-   copy Contents/mods/PearCarRadio into your user Zomboid/mods directory.
    Do not keep duplicate local/Workshop copies.
 2. Open Pear Desktop and choose a song or playlist.
 3. In Pear, enable Plugins > API Server. Use 127.0.0.1 and port 26538,
