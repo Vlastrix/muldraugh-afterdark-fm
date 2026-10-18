@@ -6,6 +6,7 @@ import math
 import os
 from pathlib import Path
 import re
+import threading
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, unquote
@@ -260,24 +261,17 @@ class RadioController:
                     artist=str(self.song.get("artist", ""))[:160])
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--zomboid-dir", type=Path, default=Path.home() / "Zomboid")
-    parser.add_argument("--port", type=int, default=26538)
-    args = parser.parse_args()
-    if not 1 <= args.port <= 65535:
-        parser.error("Port must be between 1 and 65535")
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
-    if disable_console_selection():
-        LOG.info("Mouse selection disabled to prevent the console from suspending the bridge.")
-    folder = args.zomboid_dir / "Lua"
+def run_bridge(zomboid_dir, port=26538, stop_event=None, on_status=None, api_factory=PearAPI):
+    """Run the controller on a worker thread or in the developer console."""
+    stop_event = stop_event or threading.Event()
+    folder = Path(zomboid_dir) / "Lua"
     folder.mkdir(parents=True, exist_ok=True)
     try:
         instance_lock = BridgeLock(folder / "PearCarRadio.lock")
     except OSError:
         LOG.error("Another bridge is running or its lock file is unavailable. Close the other bridge.")
         return 1
-    api = PearAPI(args.port)
+    api = api_factory(port)
     controller = RadioController(api)
     controls = ControlReader(folder / CONTROL_FILE)
     LOG.info("Singleplayer bridge. Files: %s", folder)
@@ -286,15 +280,17 @@ def main():
     next_connect = 0.0
     last_message = None
     try:
-        while True:
+        while not stop_event.is_set():
             now = time.monotonic()
             try:
                 if not api.token:
                     if now < next_connect:
-                        time.sleep(0.25)
+                        stop_event.wait(0.25)
                         continue
                     next_connect = now + 5
                     api.connect()
+                    if stop_event.is_set():
+                        break
                     # A reconnect must reapply the desired state.
                     controller.desired = None
                     controller.volume = None
@@ -307,6 +303,8 @@ def main():
             except PearError as error:
                 status = dict(connected="0", playing="0", session=controller.session,
                               message="Pear is offline. Check API Server.", title="", artist="")
+                if on_status:
+                    on_status(status.copy())
                 if str(error) != last_error:
                     LOG.warning("%s", error)
                     last_error = str(error)
@@ -315,8 +313,10 @@ def main():
                     write_status(folder / STATUS_FILE, status)
                 except OSError as file_error:
                     LOG.warning("Could not write status: %s", file_error)
-                time.sleep(2)
+                stop_event.wait(2)
                 continue
+            if on_status:
+                on_status(status.copy())
             try:
                 write_status(folder / STATUS_FILE, status)
             except OSError as error:
@@ -324,7 +324,7 @@ def main():
             if status["message"] != last_message:
                 LOG.info("%s", status["message"])
                 last_message = status["message"]
-            time.sleep(0.25)
+            stop_event.wait(0.25)
     except KeyboardInterrupt:
         LOG.info("Stopping bridge...")
     finally:
@@ -340,6 +340,19 @@ def main():
             pass
         instance_lock.close()
     return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--zomboid-dir", type=Path, default=Path.home() / "Zomboid")
+    parser.add_argument("--port", type=int, default=26538)
+    args = parser.parse_args()
+    if not 1 <= args.port <= 65535:
+        parser.error("Port must be between 1 and 65535")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
+    if disable_console_selection():
+        LOG.info("Mouse selection disabled to prevent the console from suspending the bridge.")
+    return run_bridge(args.zomboid_dir, args.port)
 
 
 if __name__ == "__main__":

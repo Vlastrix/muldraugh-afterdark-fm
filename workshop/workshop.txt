@@ -1,0 +1,16 @@
+version=1
+title=Muldraugh Afterdark FM
+description=Your music. Your car. The end of the world.
+description=
+description=Tune your vehicle radio to 94.46 MHz Afterdark FM and control the song or playlist already open in Pear Desktop. Music keeps playing outside the car, fades with distance and attracts zombies.
+description=
+description=REQUIRES PEAR DESKTOP AND THE WINDOWS COMPANION APP. A Workshop subscription alone cannot play online music. No Python installation is needed. Download the companion from the project's GitHub Releases after the companion release is published.
+description=https://github.com/Vlastrix/muldraugh-afterdark-fm
+description=
+description=Setup: enable API Server in Pear using 127.0.0.1:26538 with Auth at first. Open the companion EXE and authorize PZPearCarRadio. Enable this mod, enter a powered car, turn on its radio, select Afterdark FM and press Tune in. Keep Pear and the companion open while playing.
+description=
+description=Singleplayer only. Windows companion. One tracked car; no directional audio or wall/window effects. Select music in Pear, not by pasting a link in the game. No music is downloaded or retransmitted by this mod. A different free frequency ending in .46 is used if 94.46 MHz is occupied.
+description=
+description=Mod ID: PearCarRadio
+tags=Build 42;Interface
+visibility=private

@@ -1,0 +1,10 @@
+Muldraugh Afterdark FM's Windows companion bundles the CPython runtime,
+Tcl/Tk and the PyInstaller bootloader. Their notices are included in licenses/.
+
+CPython: https://www.python.org/psf/license/
+Tcl/Tk: https://www.tcl.tk/software/tcltk/license.html
+PyInstaller and bootloader exception: https://pyinstaller.org/en/stable/license.html
+PyInstaller hooks: https://github.com/pyinstaller/pyinstaller-hooks-contrib
+
+The companion does not bundle Pear Desktop, Project Zomboid, YouTube media,
+music files or user credentials. These are independent products.

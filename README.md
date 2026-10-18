@@ -1,18 +1,24 @@
 # Muldraugh Afterdark FM
 
-Play the **song or playlist already open in Pear Desktop** through **94.46 MHz Afterdark FM** on your Project Zomboid car radio. Audio plays in Pear; the mod does not download or retransmit music. Version **0.4.2**, experimental, singleplayer only. Requires Build 42.20 or later; developed against Build 42.21 and Pear 3.12.0.
+Play the **song or playlist already open in Pear Desktop** through **94.46 MHz Afterdark FM** on your Project Zomboid car radio. Audio plays in Pear; the mod does not download or retransmit music. Version **0.5.0**, experimental, singleplayer only. Requires Build 42.20 or later; developed against Build 42.21 and Pear 3.12.0.
 
-## Setup
+## Player setup
+
+The Windows companion opens as a desktop app. **Players do not need to install Python or use a command prompt.** Pear Desktop and the companion must stay open while playing.
+
+The first Workshop publication and GitHub download are being prepared. Release files will be available under [GitHub Releases](https://github.com/Vlastrix/muldraugh-afterdark-fm/releases). For local testing, the build produces `dist/0.5.0/MuldraughAfterdarkFM.exe`.
 
 1. Open Pear Desktop / YouTube Music, select a song or playlist and verify playback.
 2. Enable Pear's **API Server** plugin. Use hostname `127.0.0.1`, port `26538`, and **Auth at first** authentication. No router port forwarding is required. API documentation is available at <http://127.0.0.1:26538/swagger> while enabled.
-3. Close Zomboid and run `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. This copies the mod into your local mods directory; it does not edit game files or enable mods in a save.
-4. Run **Start-Bridge.cmd**. Requires Python 3.9 or later, with no extra packages to play. Authorize **PZPearCarRadio** when prompted and keep the bridge open. Never share tokens or credentials.
+3. Subscribe to the game mod in Workshop once published. For development testing, close Zomboid and use `Install-Mod.ps1` to install the local copy. Enable only one copy of the mod.
+4. Extract the Windows companion ZIP and double-click **MuldraughAfterdarkFM.exe**. It connects automatically. Authorize **PZPearCarRadio** in Pear when prompted and keep the app open.
 5. Start Zomboid and enable **Muldraugh Afterdark FM**. For an existing save, use **Load → More → Choose mods**. A test save is recommended.
 6. Enter a car with an installed radio and a charged battery. Open its radio from the vehicle menu (`V`) and switch it on. Select **94.46 MHz Afterdark FM** under **Channel**, then press **Tune in**. The panel also has a **Tune to Afterdark FM** shortcut.
 7. Use the normal radio volume control and **Previous / Pause / Next**. Unpause the game to play music.
 
-Stop the bridge with **Ctrl+C**. Forcefully terminating its process can prevent the final pause command.
+Click **Disconnect** or close the app when finished. Forcefully terminating its process can prevent the final pause command. Close any older bridge before opening the companion; only one can control the same game folder.
+
+The Workshop package contains the game mod; the companion is a separate Windows download because the game's Workshop validator rejects executables. See the [quick start](docs/QUICK_START.txt) and [publishing guide](docs/PUBLISHING.md).
 
 ## Radio behavior
 
@@ -42,12 +48,12 @@ Original radio voices and static audio are muted on Afterdark FM. This is config
 
 - Singleplayer, local player 0 only. Multiplayer and split-screen are not supported yet.
 - Select music **in Pear**. Loading links from the game is pending; upstream playlist API work is tracked in [Pear #4615](https://github.com/pear-devs/pear-desktop/pull/4615).
-- Pear and the bridge must stay open. Workshop alone will not launch the bridge.
+- The companion currently supports Windows. Workshop alone will not launch it.
 - Playback, content availability and account access depend on Pear. The mod never receives your Google password.
 
 ## Updating
 
-Install the current version with **Install-Mod.ps1** and restart Zomboid. Restart **Start-Bridge.cmd** when the bridge changes too.
+Update the Workshop mod and download the matching companion release, then restart both. During local development, install with **Install-Mod.ps1** and use the newly built EXE.
 
 During development, the project supports the current version without save migrations or backward-compatibility layers. Breaking changes may require a new world with the mod enabled; the update instructions will say when to create one. Old presets and saved data are not upgraded automatically.
 
@@ -58,16 +64,20 @@ During development, the project supports the current version without save migrat
 | Mod missing | Restart Zomboid, use Build 42.20+ and enable the mod for the save too |
 | Panel missing | Sit in a car with an installed radio, open its radio window and expand the mod panel |
 | Bridge offline | Open Pear, enable API Server, match host/port and authorize PZPearCarRadio |
-| Console title says "Select" and updates stop | Press Esc in that window; Windows text selection can suspend the process. Current versions disable QuickEdit at startup |
+| Companion cannot connect because another bridge is running | Close the old companion or bridge console, then click Connect |
 | API responds but music is silent | Play a song manually in Pear; check battery, power and pause state, then press Pause and Resume |
 | Bridge works but game cannot see it | Use the same Zomboid directory for both; inspect `Zomboid/Lua/PearCarRadio.status.txt` |
 | Lua errors | Search `%USERPROFILE%\Zomboid\console.txt` for `PearCarRadio` |
 
-For a custom directory, install with `-ZomboidDir 'D:\MyZomboid'` and launch with `Start-Bridge.cmd --zomboid-dir "D:\MyZomboid"`. For another port, pass `--port 26539` and configure the same port in Pear.
+For a custom user directory or API port, use the companion's **Settings** before connecting. Connection details appear in its window; the rotating log is stored at `Zomboid/Lua/AfterdarkBridge.log`.
 
 ## Development
 
 Code, comments, UI strings, logs, documentation and commit messages use English.
+
+Python 3.9 or later is needed for source development. Install the local mod with `powershell -ExecutionPolicy Bypass -File .\Install-Mod.ps1`. The developer CLI remains available with `python bridge/pear_bridge.py`; `Start-Bridge.cmd` opens the built app when available.
+
+Build the Windows download and separate Workshop package with `powershell -ExecutionPolicy Bypass -File .\Build-Release.ps1`. This creates an isolated build environment and bundles Python and Tcl/Tk into the EXE using PyInstaller. A GitHub Actions workflow also builds on manual dispatch or version tags. See [publishing](docs/PUBLISHING.md) for the upload checklist. Built artifacts and local credentials are excluded from Git.
 
 Run `python -m unittest discover -s tests -v`. To enable the optional Lua 5.1 harness, install `python -m pip install --target .tools lupa` and rerun. This dependency is for development only.
 

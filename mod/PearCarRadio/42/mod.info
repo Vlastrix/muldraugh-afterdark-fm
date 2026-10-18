@@ -1,7 +1,8 @@
 name=Muldraugh Afterdark FM
 id=PearCarRadio
 author=DonVladi
-description=Control Pear Desktop from your car radio. Requires the local bridge. Singleplayer only.
-version=0.4.2
+description=Play Pear Desktop through your car radio on 94.46 MHz. Requires the Windows companion. Singleplayer only.
+version=0.5.0
+poster=poster.png
 versionMin=42.20
 
