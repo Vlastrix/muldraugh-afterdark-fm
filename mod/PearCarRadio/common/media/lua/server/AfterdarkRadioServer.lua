@@ -32,15 +32,25 @@ end
 local function state(peer, echo)
     local session, gain = selectSource(peer)
     peer.follow = session
+    local volume=session and math.max(0,math.min(1,session.source.data:getDeviceVolume())) or 0
+    -- Pear applies the shared radio volume before capture. Only distance remains local.
+    local outputGain=volume>0 and gain/volume or 0
+    local listeners=0
+    if session then
+        for _, listener in pairs(peers) do
+            if listener~=session.owner and listener.follow==session then listeners=listeners+1 end
+        end
+    end
     sendServerCommand(peer.player,P.module,"state",{
         client=peer.client, status=session and (session.owner == peer and "sending" or "listening") or "waiting",
         room=session and session.room or "", owner=session and session.owner.player:getUsername() or "",
-        echo=echo or 0, rejected=peer.rejected, listeners=0,
+        echo=echo or 0, rejected=peer.rejected, listeners=listeners,
     })
     local command = session and session.owner == peer and session.commands[1]
     sendServerCommand(peer.player,P.module,"radio_state",{
         client=peer.client, room=session and session.room or "", key=session and session.key or "",
-        owner=session and session.owner.player:getUsername() or "", gain=gain or 0,
+        owner=session and session.owner.player:getUsername() or "", gain=outputGain,
+        volume=math.floor(volume*100+0.5),
         paused=session and session.paused or false, frequency=D.station() or 0, ready=peer.ready==true,
         command_id=command and command.id or 0, action=command and command.action or "none",
         title=session and session.title or "", artist=session and session.artist or "",
@@ -106,6 +116,7 @@ function R.onCommand(command, player, args)
         local key = D.key(ref)
         if command == "radio_use" then
             if not peer.ready then peer.message="Enable Share capability in the Radio connector first."; state(peer); return true end
+            if sessions[key] and sessions[key].owner==peer then state(peer); return true end
             local count=0
             for _ in pairs(sessions) do count=count+1 end
             if not sessions[key] and not owned(peer) and count>=4 then return true end

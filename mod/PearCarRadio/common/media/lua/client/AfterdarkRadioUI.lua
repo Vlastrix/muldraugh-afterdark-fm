@@ -3,6 +3,8 @@ require "RadioCom/ISRadioWindow"
 require "RadioCom/RadioWindowModules/RWMPanel"
 require "RadioCom/RadioWindowModules/RWMChannel"
 require "ISUI/ISButton"
+require "RadioCom/ISRadioAction"
+require "TimedActions/ISTimedActionQueue"
 local R,D=AfterdarkRadioClient,AfterdarkRadioDevices
 RWMAfterdarkRadio=RWMPanel:derive("RWMAfterdarkRadio")
 
@@ -31,7 +33,11 @@ function RWMAfterdarkRadio:readFromObject(player,device,data,kind)
 end
 
 function RWMAfterdarkRadio:onTune()
-    if self:doWalkTo() and D.frequency then self.deviceData:setChannel(D.frequency) end
+    if not D.frequency or not self:doWalkTo() then return end
+    if self.deviceData:getChannel()~=D.frequency then
+        ISTimedActionQueue.add(ISRadioAction:new("SetChannel",self.player,self.device,D.frequency))
+    end
+    R.refreshWindow(self.player,self.device)
 end
 function RWMAfterdarkRadio:onUse()
     if self:doWalkTo() then R.send("radio_use",self.device) end
@@ -48,7 +54,9 @@ function RWMAfterdarkRadio:prerender()
     local active=source and D.active(source) and D.canControl(self.player,source)
     local connected=R.control and getTimestampMs()-tonumber(R.control.timestamp)<=2000
     local selected=R.state.key==key and R.state.room~=""
-    self.tune:setEnable(connected and D.frequency~=nil or false)
+    local tuned=self.deviceData and self.deviceData:getChannel()==D.frequency
+    self.tune:setTitle(tuned and "Tuned to Afterdark FM" or "Tune to Afterdark FM")
+    self.tune:setEnable(connected and D.frequency~=nil and not tuned and self.deviceData:getIsTurnedOn() or false)
     self.use:setEnable(connected and active and R.state.ready==true or false)
     for _,button in ipairs({self.previous,self.next,self.pause}) do button:setEnable(connected and active and selected or false) end
     self.release:setEnable(connected and active and selected and R.state.owner==self.player:getUsername() or false)
@@ -80,6 +88,26 @@ function ISRadioWindow:readFromObject(player,device)
     end
     originalRead(self,player,device)
 end
+
+function R.refreshWindow(player,device)
+    local windows=ISRadioWindow.instancesIso
+    local window=windows and windows[player:getPlayerNum()]
+    if window and window.device==device then window:readFromObject(player,device) end
+end
+
+-- A timed action or remote player can change the channel after the button returns.
+local function refreshTuning()
+    local windows=ISRadioWindow.instancesIso
+    local window=windows and windows[0]
+    if not window or not window.deviceData or not window.player or not window.device then return end
+    local channel=window.deviceData:getChannel()
+    if window.afterdarkChannel~=channel or window.afterdarkFrequency~=D.frequency then
+        window.afterdarkChannel=channel
+        window.afterdarkFrequency=D.frequency
+        R.refreshWindow(window.player,window.device)
+    end
+end
+Events.OnTick.Add(refreshTuning)
 local originalCreate=ISRadioWindow.createChildren
 function ISRadioWindow:createChildren()
     originalCreate(self)

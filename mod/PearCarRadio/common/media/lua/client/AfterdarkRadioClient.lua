@@ -35,6 +35,7 @@ function R.writeState(serial,status)
     P.write("AfterdarkRadio.info.txt",{serial=serial,client=R.control.client,room=state.room or "",
         owning=status.status=="sending" and fresh and "1" or "0",paused=state.paused and "1" or "0",
         gain=tonumber(state.gain) or 0, command_id=tonumber(state.command_id) or 0,action=state.action or "none",
+        volume=tonumber(state.volume) or 0,
         title=state.title or "",artist=state.artist or "",owner=state.owner or "",message=state.message or ""})
 end
 

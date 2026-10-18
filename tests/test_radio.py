@@ -15,14 +15,20 @@ class FakePear:
     def __init__(self):
         self.actions = []
         self.fail_next = False
+        self.volumes = []
 
-    def post(self, action):
+    def post(self, action, data=None):
+        if action == 'volume':
+            self.volumes.append(data['volume'])
+            return
         self.actions.append(action)
         if self.fail_next and action == 'next':
             self.fail_next = False
             raise OSError('Lost HTTP response')
 
     def get(self, endpoint):
+        if endpoint == 'volume':
+            return dict(state=65)
         return dict(videoId='track', isPaused=False, title='Song', artist='Artist')
 
 
@@ -32,18 +38,19 @@ class PearRadioTests(unittest.TestCase):
         controller = PearRadioControl(api)
         controller.step(None)
         self.assertEqual(api.actions, [])
-        state = dict(owning='1', room='one', paused='0')
+        state = dict(owning='1', room='one', paused='0', volume='100')
         report = controller.step(state)
         controller.step(state)
         self.assertEqual(report['playing'], '1')
         controller.step(None)
         controller.step(None)
         self.assertEqual(api.actions, ['play', 'pause'])
+        self.assertEqual(api.volumes, [100, 65])
 
     def test_commands_are_consumed_once_even_when_http_response_is_lost(self):
         api = FakePear()
         controller = PearRadioControl(api)
-        state = dict(owning='1', room='one', paused='0', command_id='1', action='next')
+        state = dict(owning='1', room='one', paused='0', volume='100', command_id='1', action='next')
         api.fail_next = True
         with self.assertRaises(OSError):
             controller.step(state)
@@ -52,6 +59,17 @@ class PearRadioTests(unittest.TestCase):
         state.update(room='two')
         controller.step(state)
         self.assertEqual(api.actions, ['play', 'next', 'play', 'next'])
+
+    def test_shared_volume_changes_include_zero_and_restore_original_on_release(self):
+        api=FakePear()
+        control=PearRadioControl(api)
+        state=dict(owning='1',room='radio',paused='0',volume='40')
+        control.step(state)
+        control.step(state)
+        state['volume']='0'
+        control.step(state)
+        control.step(None)
+        self.assertEqual(api.volumes,[40,0,65])
 
 
 @unittest.skipUnless(LuaRuntime and importlib.util.find_spec('av'), 'Worker integration needs Lua and PyAV')
@@ -123,6 +141,9 @@ class RadioWorkerTests(unittest.TestCase):
                 self.assertTrue(drive(lambda: 1 in outputs and outputs[1].received>=2),failures)
                 self.assertEqual(len(apis),1)
                 self.assertTrue(drive(lambda: 'play' in apis[0].actions),failures)
+                self.assertEqual(outputs[1].gain,0.5)
+                network.server.lua.globals().part.data.volume=0.4
+                self.assertTrue(drive(lambda: 40 in apis[0].volumes),failures)
                 self.assertEqual(outputs[1].gain,0.5)
                 network.clients[1].lua.execute('AfterdarkRadioClient.send("radio_control",part,"pause")')
                 network.flush()
@@ -240,6 +261,11 @@ class RadioNetworkTests(unittest.TestCase):
         self.tick(1000)
         self.assertEqual(self.use(), '')
 
+    def test_using_own_pear_again_keeps_existing_session(self):
+        room=self.use()
+        self.tick(310)
+        self.assertEqual(self.use(),room)
+
     def test_duplicate_action_is_not_queued_twice_and_pause_blocks_audio(self):
         room = self.use()
         self.command(1, 'radio_control', room=room, action='pause')
@@ -291,6 +317,17 @@ class RadioNetworkTests(unittest.TestCase):
         self.tick(300)
         self.assertEqual(self.state(1).room, '')
 
+    def test_shared_volume_is_applied_at_source_without_double_attenuation(self):
+        self.use()
+        self.globals().part.data.volume=0.4
+        self.tick(300)
+        self.assertEqual(self.state().volume,40)
+        self.assertEqual(self.state(1).gain,1)
+        self.globals().part.data.volume=0
+        self.tick(300)
+        self.assertEqual(self.state().volume,0)
+        self.assertEqual(self.state(1).room,'')
+
     def test_connector_timeout_stops_owner_without_selecting_someone_else(self):
         self.use()
         self.reports[0] = None
@@ -337,7 +374,11 @@ class RadioUITests(unittest.TestCase):
         from test_lua import HARNESS
         lua = LuaRuntime(unpack_returned_tuples=True)
         lua.execute(HARNESS)
-        lua.execute('client=true')
+        lua.execute('''
+            client=true
+            Events.OnTick.Add=function(fn) table.insert(Events.OnTick.handlers,fn) end
+            Events.OnTick.emit=function() for _,fn in ipairs(Events.OnTick.handlers) do fn() end end
+        ''')
         lua.execute((LUA / 'shared/AfterdarkGameProtocol.lua').read_text())
         lua.execute((LUA / 'shared/AfterdarkRadioDevices.lua').read_text())
         lua.execute((LUA / 'client/AfterdarkRadioClient.lua').read_text())
@@ -354,6 +395,13 @@ class RadioUITests(unittest.TestCase):
             panel:createChildren()
             device.getIsTelevision=function() return false end
             panel:readFromObject(player,part,device,'VehiclePart')
+            queued={}
+            ISTimedActionQueue={add=function(action) table.insert(queued,action) end}
+            ISRadioAction={new=function(self,mode,p,d,frequency) return {mode=mode,frequency=frequency} end}
+            channel=101200
+            window.device=part; window.player=player; window.deviceData=device
+            ISRadioWindow.instancesIso={[0]=window}
+            panel:onTune()
             panel:onUse(); panel:onNext(); panel:onPause(); panel:onRelease()
         ''')
         self.assertTrue(lua.eval('window.vanillaCreated'))
@@ -362,3 +410,8 @@ class RadioUITests(unittest.TestCase):
         self.assertEqual(lua.eval('sent[2].args.action'),'next')
         self.assertEqual(lua.eval('sent[3].args.action'),'pause')
         self.assertEqual(lua.eval('sent[4].args.action'),'release')
+        self.assertEqual(lua.eval('queued[1].mode'),'SetChannel')
+        self.assertEqual(lua.eval('queued[1].frequency'),94460)
+        lua.execute('channel=94460; Events.OnTick.emit()')
+        self.assertEqual(lua.eval('window.afterdarkChannel'),94460)
+        self.assertEqual(lua.eval('window.readPresetCount'),2)

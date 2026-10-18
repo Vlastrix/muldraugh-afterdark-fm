@@ -14,16 +14,32 @@ class PearRadioControl:
         self.room = None
         self.desired = None
         self.command = None
+        self.saved_volume = None
+        self.volume = None
 
     def step(self, state):
         owning = bool(state and state.get('owning') == '1' and state.get('room'))
         if not owning:
             if self.room:
                 self.api.post('pause')
+                if self.saved_volume is not None:
+                    self.api.post('volume', {'volume': self.saved_volume})
                 self.room = None
                 self.desired = None
+                self.saved_volume = self.volume = None
             return dict(playing='0', report_room='', command_ack=0, title='', artist='')
         room = state['room']
+        volume = int(state['volume'])
+        if not 0 <= volume <= 100:
+            raise ValueError('Invalid shared radio volume.')
+        if self.room is None:
+            original = (self.api.get('volume') or {}).get('state')
+            if isinstance(original, (int, float)) and not isinstance(original, bool) and 0 <= original <= 100:
+                self.saved_volume = original
+        self.room = room
+        if volume != self.volume:
+            self.api.post('volume', {'volume': volume})
+            self.volume = volume
         desired = (room, state.get('paused') == '1')
         if desired != self.desired:
             self.room = room
